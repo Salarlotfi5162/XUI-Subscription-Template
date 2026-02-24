@@ -12,6 +12,8 @@
     <link href="https://cdn.jsdelivr.net/npm/yekan-font@1.0.0/css/yekan-font.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- QRCode.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         :root {
@@ -475,6 +477,71 @@
             color: var(--success);
         }
 
+        /* QR Modal */
+        .qr-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .qr-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .qr-modal {
+            background: var(--surface-color);
+            border: 1px solid var(--accent-pink);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            text-align: center;
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-glow);
+            max-width: 90%;
+            width: 320px;
+        }
+
+        .qr-modal-overlay.active .qr-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .qr-container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .qr-close-btn {
+            background: var(--surface-color-2);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .qr-close-btn:hover {
+            background: var(--accent-pink);
+            border-color: var(--accent-pink);
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .info-grid {
@@ -637,7 +704,7 @@
                                 <div class="action-icon" onclick="copyText('<%= data.suburl %>')">
                                     <i class="fas fa-clipboard"></i>
                                 </div>
-                                <div class="action-icon">
+                                <div class="action-icon" onclick="showQr('<%= data.suburl %>')">
                                     <i class="fas fa-qrcode"></i>
                                 </div>
                             </div>
@@ -653,7 +720,7 @@
                                     <div class="action-icon" onclick="copyText('<%= config.link %>')">
                                         <i class="fas fa-clipboard"></i>
                                     </div>
-                                    <div class="action-icon">
+                                    <div class="action-icon" onclick="showQr('<%= config.link %>')">
                                         <i class="fas fa-qrcode"></i>
                                     </div>
                                 </div>
@@ -779,7 +846,45 @@
         <i class="fas fa-check-circle"></i> با موفقیت کپی شد!
     </div>
 
+    <!-- QR Modal -->
+    <div class="qr-modal-overlay" id="qrModalOverlay" onclick="closeQr(event)">
+        <div class="qr-modal" onclick="event.stopPropagation()">
+            <h3 style="margin-bottom: 20px; color: var(--text-primary);">کد QR</h3>
+            <div class="qr-container" id="qrcode"></div>
+            <button class="qr-close-btn" onclick="closeQr()">بستن</button>
+        </div>
+    </div>
+
     <script>
+        // QR Code Logic
+        let qrcodeInstance = null;
+
+        function showQr(text) {
+            const modal = document.getElementById('qrModalOverlay');
+            const qrContainer = document.getElementById('qrcode');
+
+            // Clear previous QR code if it exists
+            qrContainer.innerHTML = '';
+
+            // Generate new QR code
+            qrcodeInstance = new QRCode(qrContainer, {
+                text: text,
+                width: 200,
+                height: 200,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+
+            modal.classList.add('active');
+        }
+
+        function closeQr(e) {
+            if (e && e.target !== document.getElementById('qrModalOverlay')) return;
+            const modal = document.getElementById('qrModalOverlay');
+            modal.classList.remove('active');
+        }
+
         // Main Tabs Logic
         function openTab(tabId) {
             // Hide all contents
