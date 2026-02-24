@@ -80,60 +80,84 @@ const fetchWithRetry = async (url, options, retries = 3) => {
     }
 };
 
+let cachedCookie = null;
+let loginPromise = null;
+
+const performLogin = async () => {
+    let loginPayload = {
+        username: USERNAME,
+        password: PASSWORD
+    };
+
+    if (TWO_FACTOR === 'true' && TOTP_SECRET) {
+        loginPayload.twoFactorCode = speakeasy.totp({
+            secret: TOTP_SECRET,
+            encoding: 'base32',
+            window: 1
+        });
+    }
+
+    const response = await fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: qs.stringify(loginPayload),
+    });
+
+    if (!response.ok) throw new Error("Login request failed.");
+
+    const result = await response.json();
+    if (!result.success) throw new Error(result.msg || "Login unsuccessful");
+
+    cachedCookie = response.headers.get("set-cookie");
+    return cachedCookie;
+};
+
+const getCookie = async () => {
+    if (cachedCookie) return cachedCookie;
+    if (!loginPromise) {
+        loginPromise = performLogin().finally(() => loginPromise = null);
+    }
+    return loginPromise;
+};
+
+const xuiApiCall = async (endpoint, method = "GET") => {
+    let cookie = await getCookie();
+    let res = await fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}${endpoint}`, {
+        method,
+        headers: { cookie, "Accept": "application/json" }
+    });
+
+    let data = await res.json();
+    if (!data.success && (data.msg && data.msg.includes("login") || res.status === 401 || res.status === 403)) {
+        cachedCookie = null; // Invalidate current session
+        cookie = await getCookie(); // Get fresh session
+        res = await fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}${endpoint}`, {
+            method,
+            headers: { cookie, "Accept": "application/json" }
+        });
+        data = await res.json();
+    }
+    return data;
+};
+
 app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
     try {
         const { subId: targetSubId } = req.params;
         const userAgent = req.headers['user-agent'] || '';
 
-        let loginPayload = {
-            username: USERNAME,
-            password: PASSWORD
-        };
-
-        if (TWO_FACTOR === 'true' && TOTP_SECRET) {
-            const currentTOTP = speakeasy.totp({
-                secret: TOTP_SECRET,
-                encoding: 'base32',
-                window: 1
-            });
-            loginPayload.twoFactorCode = currentTOTP;
-        }
-
-
-        const [loginResponse, suburl_content] = await Promise.all([
-            fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: qs.stringify(loginPayload),
-            }),
+        const [listResult, suburl_content] = await Promise.all([
+            xuiApiCall('/panel/api/inbounds/list'),
             fetchUrlContent(`${SUBSCRIPTION}${targetSubId}`)
         ]);
 
-        if (!loginResponse.ok) throw new Error("Login request failed.");
-
-        const loginResult = await loginResponse.json();
-        if (!loginResult.success) throw new Error(loginResult.msg || "Login unsuccessful");
-
-        const cookie = loginResponse.headers.get("set-cookie");
-        const listResponse = await fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}/panel/api/inbounds/list`, {
-            method: "GET",
-            headers: { cookie, "Accept": "application/json" }
-        });
-
-        const listResult = await listResponse.json();
         const foundClient = listResult.obj
             .flatMap(inbound => JSON.parse(inbound.settings).clients)
             .find(client => client.subId === targetSubId);
 
         if (!foundClient) return res.status(404).json({ message: "No object found with the specified subId." });
 
-        const trafficResponse = await fetchWithRetry(
-            `${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}/panel/api/inbounds/getClientTraffics/${foundClient.email}`, {
-            method: "GET",
-            headers: { cookie, "Accept": "application/json" }
-        });
+        const trafficData = await xuiApiCall(`/panel/api/inbounds/getClientTraffics/${foundClient.email}`);
 
-        const trafficData = await trafficResponse.json();
         const expiryTimeJalali = convertToJalali(trafficData.obj.expiryTime);
         const suburl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
