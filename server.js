@@ -322,6 +322,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             return res.render("sub", {
                 data: {
                     ...trafficData.obj,
+                    email: dbUsername, // Override the email string to not show _inb1 in the UI
                     expiryTimeJalali,
                     suburl,
                     suburl_content,
