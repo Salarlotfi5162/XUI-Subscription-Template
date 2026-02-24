@@ -12,7 +12,18 @@ import mysql from 'mysql2/promise';
 
 // Database pool will be initialized after loading config
 
+// Database pool will be initialized after loading config
+
 const app = express();
+
+// Security Settings
+app.disable('x-powered-by'); // Hide Express JS signature
+app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+});
 
 const CONFIG_FILE_NAME = "dvhost.config";
 const BROWSER_KEYWORDS = ['Mozilla', 'Chrome', 'Safari', 'Edge', 'Opera', 'Firefox', 'Trident', 'WebKit'];
