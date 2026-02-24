@@ -751,7 +751,11 @@
                 <div class="stat-block">
                     <span class="stat-label">حجم باقی مانده</span>
                     <span class="stat-value">
-                        <%= data.baseLimitGB> 0 ? data.remainingUsageGB + ' GB' : '∞' %>
+                        <% if(data.baseLimitGB> 0) { %>
+                            <%= data.remainingUsageGB %> GB
+                                <% } else { %>
+                                    <i class="fas fa-infinity" style="font-size: 24px;"></i>
+                                    <% } %>
                     </span>
                 </div>
             </div>
