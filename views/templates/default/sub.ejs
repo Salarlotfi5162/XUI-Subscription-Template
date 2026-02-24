@@ -359,6 +359,7 @@
         /* Apps Section */
         .apps-container {
             display: flex;
+            flex-direction: row-reverse;
             gap: 20px;
             min-height: 300px;
         }
@@ -368,8 +369,8 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            border-left: 1px solid var(--border-color);
-            padding-left: 15px;
+            border-right: 1px solid var(--border-color);
+            padding-right: 15px;
         }
 
         .os-tab {
@@ -436,8 +437,15 @@
             border-radius: var(--radius-md);
             padding: 16px 20px;
             display: flex;
+            flex-direction: row-reverse;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .app-item:hover {
+            border-color: var(--accent-pink-dim);
+            background-color: rgba(255, 255, 255, 0.02);
         }
 
         .app-name {
@@ -569,8 +577,10 @@
             .os-tabs {
                 width: 100%;
                 flex-direction: row;
+                border-left: none;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
+                padding-left: 0;
                 padding-right: 0;
                 padding-bottom: 10px;
                 justify-content: space-between;
