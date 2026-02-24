@@ -216,13 +216,18 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         purchaseDateStr = "نامشخص";
         let dbUsername = targetSubId;
         const subIdParts = targetSubId.split('_');
+
+        // Remove the `_inb` suffix (which is usually the 3rd part or later) based on user's sample `6051224505_a04c`
         if (subIdParts.length >= 2) {
-            dbUsername = `${subIdParts[0]}_${subIdParts[1]}`; // e.g. 6051224505_a04c
+            dbUsername = subIdParts.slice(0, 2).join('_');
         }
 
         if (dbPool) {
             try {
+                console.log(`[DB Debug] Querying invoice for username: '${dbUsername}'`);
                 const [rows] = await dbPool.execute('SELECT time_sell FROM invoice WHERE username = ? LIMIT 1', [dbUsername]);
+                console.log(`[DB Debug] SQL Response for '${dbUsername}':`, rows);
+
                 if (rows.length > 0 && rows[0].time_sell) {
                     const timeSell = rows[0].time_sell;
                     const pDate = new Date(timeSell * 1000);
