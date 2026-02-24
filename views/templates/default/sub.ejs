@@ -198,8 +198,7 @@
         }
 
         .info-row {
-            background-color: #0b090c;
-            /* Deep blackish color */
+            background-color: transparent;
             border-radius: var(--radius-md);
             padding: 15px 20px;
             display: flex;
@@ -212,7 +211,6 @@
         .info-row:hover {
             border-color: var(--accent-pink-dim);
             transform: translateY(-4px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
         }
 
         .info-label {
@@ -262,7 +260,7 @@
         }
 
         .stat-block {
-            background-color: var(--surface-color-2);
+            background-color: transparent;
             border-radius: var(--radius-md);
             border: 1px solid var(--border-color);
             padding: 20px 15px;
@@ -270,6 +268,12 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-block:hover {
+            border-color: var(--accent-pink-dim);
+            transform: translateY(-4px);
         }
 
         .stat-label {
