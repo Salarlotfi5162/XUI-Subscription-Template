@@ -198,18 +198,21 @@
         }
 
         .info-row {
-            background-color: var(--surface-color-2);
+            background-color: #0b090c;
+            /* Deep blackish color */
             border-radius: var(--radius-md);
             padding: 15px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid var(--border-color);
-            transition: border-color 0.3s;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .info-row:hover {
-            border-color: var(--border-highlight);
+            border-color: var(--accent-pink-dim);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);
         }
 
         .info-label {
