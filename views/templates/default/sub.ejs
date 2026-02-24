@@ -148,14 +148,28 @@
         }
 
         .card-header {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 12px;
             margin-bottom: 25px;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: bold;
             flex-direction: row-reverse;
+            background-color: #221e25;
+            padding: 10px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .card-header:hover {
+            background-color: #2a252e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
 
         .card-header-dot {
@@ -644,13 +658,13 @@
 
     <div class="main-container">
         <!-- Service Info Card -->
-        <div class="card">
+        <div class="card" style="display: flex; flex-direction: column; align-items: flex-end;">
             <div class="card-header">
                 <span>اطلاعات سرویس</span>
                 <div class="card-header-dot"></div>
             </div>
 
-            <div class="info-grid">
+            <div class="info-grid" style="width: 100%;">
                 <!-- Column 1 -->
                 <div class="info-row">
                     <span class="info-label"><i class="fas fa-edit"></i> نام سرویس :</span>
@@ -703,7 +717,7 @@
             </div>
 
             <!-- Stats Bottom Row -->
-            <div class="stats-grid">
+            <div class="stats-grid" style="width: 100%;">
                 <div class="stat-block">
                     <span class="stat-label">مدت باقی مانده از اعتبار</span>
                     <span class="stat-value" style="font-size: 16px;">
@@ -731,23 +745,22 @@
         </div>
 
         <!-- Details Card -->
-        <div class="card" style="padding-top: 50px; position: relative;">
+        <div class="card" style="display: flex; flex-direction: column; align-items: flex-end;">
 
-            <div class="card-header"
-                style="position: absolute; top: 25px; right: 25px; justify-content: flex-end; width: calc(100% - 50px);">
+            <div class="card-header" style="margin-bottom: 30px;">
                 <span>کانفیگ ها</span>
                 <div class="card-header-dot"></div>
             </div>
 
             <!-- Tabs Navigation -->
-            <div class="tabs-nav">
+            <div class="tabs-nav" style="width: 100%;">
                 <button class="tab-btn active" onclick="openTab('links-tab')">لینک ها</button>
                 <button class="tab-btn" onclick="openTab('add-sub-tab')">افزودن سابسکریپشن</button>
                 <button class="tab-btn" onclick="openTab('apps-tab')">برنامه ها</button>
             </div>
 
             <!-- Links Tab -->
-            <div id="links-tab" class="tab-content active">
+            <div id="links-tab" class="tab-content active" style="width: 100%;">
                 <div class="config-list">
                     <!-- Global Sub Link at the top -->
                     <% if(data.linksArray && data.linksArray.length> 0) { %>
@@ -793,7 +806,7 @@
             </div>
 
             <!-- Add Sub Tab -->
-            <div id="add-sub-tab" class="tab-content">
+            <div id="add-sub-tab" class="tab-content" style="width: 100%;">
                 <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
                     <i class="fas fa-link" style="font-size: 40px; margin-bottom: 20px; color: var(--accent-pink);"></i>
                     <h3>لینک اشتراک شما</h3>
@@ -808,7 +821,7 @@
             </div>
 
             <!-- Apps Tab -->
-            <div id="apps-tab" class="tab-content">
+            <div id="apps-tab" class="tab-content" style="width: 100%;">
                 <div class="apps-container">
 
                     <div class="apps-list active" id="app-apple">
