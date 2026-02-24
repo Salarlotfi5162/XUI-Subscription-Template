@@ -190,12 +190,27 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         // --- Added Logic for Premium UI ---
         // 1. Calculate advanced UI data from trafficData & listResult
         let inboundsCount = 0;
+        let lastConnectionTime = 0; // Will hold the max lastOnline among all inbounds
 
         listResult.obj.forEach(inbound => {
             const settings = JSON.parse(inbound.settings);
             const client = settings.clients.find(c => c.email === foundClient.email);
             if (client) {
                 inboundsCount++;
+            }
+
+            // In Sanaei, clientStats array holds the traffic/online status for each client
+            if (inbound.clientStats) {
+                const cStats = inbound.clientStats.find(c => c.email === foundClient.email);
+                if (cStats && cStats.lastOnline && cStats.lastOnline > lastConnectionTime) {
+                    // It's possible the user is in multiple inbounds, we take the most recent online time
+                    lastConnectionTime = cStats.lastOnline;
+                }
+            } else if (client && client.lastOnline) {
+                // Fallback in case they store it directly in the client settings rather than clientStats
+                if (client.lastOnline > lastConnectionTime) {
+                    lastConnectionTime = client.lastOnline;
+                }
             }
         });
 
@@ -230,15 +245,26 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         }
 
         // ==========================================
-        // Fetch Last Connection Heuristic
+        // Fetch Last Connection Actual Time
         // ==========================================
-        // پنل‌های سنایی و خیدی اندپوینت مستقیمی برای دریافت دقیق زمان آخرین اتصال ندارند.
-        // بر اساس منطق ارائه شده توسط کاربر، از مصرف ترافیک برای تشخیص اتصال استفاده می‌کنیم:
+        // As per user's logic, Sanaei provides lastOnline in milliseconds
         let lastConnectionStr = "متصل نشده";
-        if ((trafficData.obj.up + trafficData.obj.down) > 0) {
-            lastConnectionStr = "در حال استفاده (جزئیات نامشخص)";
+
+        if (lastConnectionTime > 0) {
+            // Found a valid non-zero lastOnline timestamp
+            const onlineDt = new Date(lastConnectionTime); // It's already in ms
+            const { jy, jm, jd } = toJalaali(onlineDt.getFullYear(), onlineDt.getMonth() + 1, onlineDt.getDate());
+            const hours = onlineDt.getHours().toString().padStart(2, '0');
+            const minutes = onlineDt.getMinutes().toString().padStart(2, '0');
+            const seconds = onlineDt.getSeconds().toString().padStart(2, '0');
+            lastConnectionStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd} ${hours}:${minutes}:${seconds}`;
         } else {
-            lastConnectionStr = "تاکنون متصل نشده است";
+            // Fallback heuristic if it's 0 or missing
+            if ((trafficData.obj.up + trafficData.obj.down) > 0) {
+                lastConnectionStr = "در حال استفاده (جزئیات نامشخص)";
+            } else {
+                lastConnectionStr = "تاکنون متصل نشده است";
+            }
         }
 
         let daysText = "نامحدود";
