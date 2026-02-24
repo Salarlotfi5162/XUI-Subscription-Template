@@ -293,14 +293,13 @@
         .config-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
         .config-item {
-            background-color: var(--surface-color-2);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            padding: 16px 20px;
+            background-color: transparent;
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -308,42 +307,53 @@
         }
 
         .config-item:hover {
-            border-color: var(--accent-pink-dim);
-            background-color: rgba(255, 255, 255, 0.02);
+            border-color: var(--border-highlight);
+            background-color: rgba(255, 255, 255, 0.01);
+            border-radius: var(--radius-sm);
         }
 
         .config-name {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-primary);
             direction: ltr;
         }
 
         .config-actions {
             display: flex;
-            gap: 15px;
+            gap: 10px;
+            align-items: center;
         }
 
         .action-icon {
-            color: var(--accent-pink);
-            font-size: 20px;
+            font-size: 16px;
             cursor: pointer;
-            transition: transform 0.2s, color 0.2s;
-            background: var(--accent-pink-dim);
-            width: 36px;
-            height: 36px;
+            transition: transform 0.2s, opacity 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
+            border-radius: 6px;
+            opacity: 0.8;
+        }
+
+        .action-icon.copy-btn {
+            color: #d82b57;
+            /* Pinkish red */
+        }
+
+        .action-icon.qr-btn {
+            color: #d82b57;
+            border: 2px dashed #d82b57;
+            padding: 2px 4px;
+            font-size: 10px;
+            border-radius: 4px;
         }
 
         .action-icon:hover {
             transform: scale(1.1);
-            color: var(--text-primary);
-            background: var(--accent-pink);
+            opacity: 1;
         }
 
         /* Apps Section */
@@ -699,36 +709,36 @@
                 <div class="config-list">
                     <!-- Global Sub Link at the top -->
                     <% if(data.linksArray && data.linksArray.length> 0) { %>
-                        <div class="config-item" style="border-color: var(--accent-pink);">
+                        <div class="config-item">
                             <div class="config-actions">
-                                <div class="action-icon" onclick="copyText('<%= data.suburl %>')">
-                                    <i class="fas fa-clipboard"></i>
-                                </div>
-                                <div class="action-icon" onclick="showQr('<%= data.suburl %>')">
+                                <div class="action-icon qr-btn" onclick="showQr('<%= data.suburl %>')">
                                     <i class="fas fa-qrcode"></i>
+                                </div>
+                                <div class="action-icon copy-btn" onclick="copyText('<%= data.suburl %>')">
+                                    <i class="fas fa-clipboard"></i>
                                 </div>
                             </div>
                             <div class="config-name">
                                 <span>لینک سابسکریپشن (بروزرسانی خودکار)</span>
-                                <i class="fas fa-sync" style="color: var(--accent-pink);"></i>
+                                <i class="fas fa-sync" style="color: #ff9800;"></i>
                             </div>
                         </div>
 
                         <% data.linksArray.forEach(function(config) { %>
                             <div class="config-item">
                                 <div class="config-actions">
-                                    <div class="action-icon" onclick="copyText('<%= config.link %>')">
-                                        <i class="fas fa-clipboard"></i>
-                                    </div>
-                                    <div class="action-icon" onclick="showQr('<%= config.link %>')">
+                                    <div class="action-icon qr-btn" onclick="showQr('<%= config.link %>')">
                                         <i class="fas fa-qrcode"></i>
+                                    </div>
+                                    <div class="action-icon copy-btn" onclick="copyText('<%= config.link %>')">
+                                        <i class="fas fa-clipboard"></i>
                                     </div>
                                 </div>
                                 <div class="config-name">
                                     <span>
                                         <%= config.name %>
                                     </span>
-                                    <i class="fas fa-bolt"></i>
+                                    <i class="fas fa-bolt" style="color: #4CAF50;"></i>
                                 </div>
                             </div>
                             <% }); %>
