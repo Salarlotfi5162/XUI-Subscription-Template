@@ -8,6 +8,9 @@ import { toJalaali } from "jalaali-js";
 import https from 'https';
 import http from 'http';
 import speakeasy from 'speakeasy';
+import mysql from 'mysql2/promise';
+
+// Database pool will be initialized after loading config
 
 const app = express();
 
@@ -53,8 +56,31 @@ const {
     WHATSAPP_URL = '',
     Backup_link: BACKUP_LINK = '',
     TOTP_SECRET = '',
-    TWO_FACTOR = 'false'
+    TWO_FACTOR = 'false',
+    DB_HOST = '',
+    DB_NAME = '',
+    DB_USER = '',
+    DB_PASS = ''
 } = config;
+
+let dbPool = null;
+if (DB_HOST && DB_NAME && DB_USER && DB_PASS) {
+    try {
+        dbPool = mysql.createPool({
+            host: DB_HOST,
+            user: DB_USER,
+            password: DB_PASS,
+            database: DB_NAME,
+            charset: 'utf8mb4',
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0
+        });
+        console.log("Database pool initialized successfully.");
+    } catch (e) {
+        console.error("Failed to initialize database pool:", e.message);
+    }
+}
 
 const convertToJalali = (timestamp) => {
     const date = new Date(timestamp);
@@ -186,16 +212,28 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         let statusText = trafficData.obj.enable ? "فعال" : "غیرفعال";
         let isExpired = false;
 
-        // Attempt to find or estimate a purchase date
-        // Note: Sanaei API doesn't always expose `createdAt`. We try to grab it from `foundClient` if it exists.
-        if (foundClient && foundClient.createdAt && foundClient.createdAt > 0) {
-            purchaseDateStr = new Date(foundClient.createdAt).toLocaleString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
-        } else if (trafficData.obj.expiryTime > 0) {
-            // Rough estimate: we assume a 30-day (1 month) or 90-day (3 month) subscription based on total limit.
-            // If we can't be sure, we mark it as "Not recorded by panel"
-            purchaseDateStr = "ثبت نشده در پنل";
-        } else {
-            purchaseDateStr = "بدون انقضا";
+        // Attempt to find purchase date precisely from the TeleBot DB
+        purchaseDateStr = "نامشخص";
+        let dbUsername = targetSubId;
+        const subIdParts = targetSubId.split('_');
+        if (subIdParts.length >= 2) {
+            dbUsername = `${subIdParts[0]}_${subIdParts[1]}`; // e.g. 6051224505_a04c
+        }
+
+        if (dbPool) {
+            try {
+                const [rows] = await dbPool.execute('SELECT time_sell FROM invoice WHERE username = ? LIMIT 1', [dbUsername]);
+                if (rows.length > 0 && rows[0].time_sell) {
+                    const timeSell = rows[0].time_sell;
+                    const pDate = new Date(timeSell * 1000);
+                    const { jy, jm, jd } = toJalaali(pDate.getFullYear(), pDate.getMonth() + 1, pDate.getDate());
+                    purchaseDateStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd}`;
+                } else {
+                    purchaseDateStr = "ثبت نشده در ربات";
+                }
+            } catch (dbErr) {
+                console.error("Database query error for purchase_date:", dbErr.message);
+            }
         }
 
         if (trafficData.obj.expiryTime > 0) {
