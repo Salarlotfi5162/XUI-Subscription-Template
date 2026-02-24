@@ -234,7 +234,10 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
                     const timeSell = rows[0].time_sell;
                     const pDate = new Date(timeSell * 1000);
                     const { jy, jm, jd } = toJalaali(pDate.getFullYear(), pDate.getMonth() + 1, pDate.getDate());
-                    purchaseDateStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd}`;
+                    const hours = pDate.getHours().toString().padStart(2, '0');
+                    const minutes = pDate.getMinutes().toString().padStart(2, '0');
+                    const seconds = pDate.getSeconds().toString().padStart(2, '0');
+                    purchaseDateStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd} ${hours}:${minutes}:${seconds}`;
                 }
             } catch (dbErr) {
                 console.error("Database query error for purchase_date:", dbErr.message);
