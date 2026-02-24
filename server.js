@@ -215,11 +215,10 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         // Attempt to find purchase date precisely from the TeleBot DB
         purchaseDateStr = "نامشخص";
         let dbUsername = targetSubId;
-        const subIdParts = targetSubId.split('_');
 
-        // Remove the `_inb` suffix (which is usually the 3rd part or later) based on user's sample `6051224505_a04c`
-        if (subIdParts.length >= 2) {
-            dbUsername = subIdParts.slice(0, 2).join('_');
+        // Remove the `_inb` suffix to query the exact username (e.g. w7ik439u from w7ik439u_inb1)
+        if (foundClient && foundClient.email) {
+            dbUsername = foundClient.email.split('_inb')[0].trim();
         }
 
         if (dbPool) {
