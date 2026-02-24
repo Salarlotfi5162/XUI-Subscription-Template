@@ -43,7 +43,7 @@ install_dependencies() {
 clone_project() {
     echo "Cloning the project to $PROJECT_DIR..."
     sudo rm -rf "$PROJECT_DIR"
-    sudo git clone https://github.com/dev-ir/xui-subscription-template.git "$PROJECT_DIR"
+    sudo git clone https://github.com/Salarlotfi5162/XUI-Subscription-Template.git "$PROJECT_DIR"
     cd "$PROJECT_DIR" || exit
 }
 
