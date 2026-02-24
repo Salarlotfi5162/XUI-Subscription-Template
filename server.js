@@ -232,52 +232,9 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         // ==========================================
         // Fetch Last Connection from Panel API
         // ==========================================
-        let lastConnectionStr = "متصل نشده";
-        try {
-            // A. Get Token from Sanaei /api/admin/token
-            const tokenResponse = await fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}/api/admin/token`, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: qs.stringify({ username: USERNAME, password: PASSWORD })
-            });
-
-            if (tokenResponse.status === 200) {
-                const tokenData = await tokenResponse.json();
-                if (tokenData.access_token) {
-                    const panelToken = tokenData.access_token;
-
-                    // B. Get User Info from /api/user/{dbUsername}
-                    const userResponse = await fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}/api/user/${dbUsername}`, {
-                        method: "GET",
-                        headers: {
-                            "Accept": "application/json",
-                            "Authorization": `Bearer ${panelToken}`
-                        }
-                    });
-
-                    if (userResponse.status === 200) {
-                        const userInfo = await userResponse.json();
-                        if (userInfo.online_at) {
-                            const onlineDt = new Date(userInfo.online_at);
-                            // Convert UTC to local format (Tehran timezone handled by server OS usually, but we display in Jalali or local string)
-                            const { jy, jm, jd } = toJalaali(onlineDt.getFullYear(), onlineDt.getMonth() + 1, onlineDt.getDate());
-                            const hours = onlineDt.getHours().toString().padStart(2, '0');
-                            const minutes = onlineDt.getMinutes().toString().padStart(2, '0');
-                            const seconds = onlineDt.getSeconds().toString().padStart(2, '0');
-                            lastConnectionStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd} ${hours}:${minutes}:${seconds}`;
-                        }
-                    } else if (userResponse.status === 404) {
-                        lastConnectionStr = "کاربر در پنل یافت نشد!";
-                    }
-                }
-            } else {
-                lastConnectionStr = "خطا در اتصال به پنل (ورود)";
-            }
-        } catch (apiErr) {
-            console.error("Panel API fetch error:", apiErr.message);
-            // Fallback to old heuristic if endpoint fails
-            lastConnectionStr = "خطا در ارتباط با پنل API";
-        }
+        // پنل‌های سنایی و علیرضا اندپوینت مستقیمی برای دریافت دقیق زمان آخرین اتصال مثل مرزبان ندارند.
+        // تا زمان اضافه شدن این قابلیت به وب‌سرویس اصلی XUI، این مقدار نامشخص خواهد بود
+        let lastConnectionStr = "نامشخص";
 
         let daysText = "نامحدود";
         let statusText = trafficData.obj.enable ? "فعال" : "غیرفعال";
