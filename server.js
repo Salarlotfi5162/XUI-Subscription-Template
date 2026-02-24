@@ -190,8 +190,6 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         // --- Added Logic for Premium UI ---
         // 1. Calculate advanced UI data from trafficData & listResult
         let inboundsCount = 0;
-        let lastConnectionTime = 0;
-        let createdTime = Date.now(); // Fallback
 
         listResult.obj.forEach(inbound => {
             const settings = JSON.parse(inbound.settings);
@@ -205,40 +203,85 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         const baseLimitGB = inboundsCount > 0 ? ((trafficData.obj.total / inboundsCount) / 1073741824).toFixed(2) : 0;
         const remainingUsageGB = inboundsCount > 0 ? Math.max(0, baseLimitGB - totalUsageGB).toFixed(2) : 0;
 
-        // Try to get total configured days to calculate purchase date (approximate if expiry is set)
-        let purchaseDateStr = "نامشخص";
-        let lastConnectionStr = "نامشخص";
-        let daysText = "نامحدود";
-        let statusText = trafficData.obj.enable ? "فعال" : "غیرفعال";
-        let isExpired = false;
-
-        // Attempt to find purchase date precisely from the TeleBot DB
-        purchaseDateStr = "نامشخص";
         let dbUsername = targetSubId;
-
-        // Remove the `_inb` suffix to query the exact username (e.g. w7ik439u from w7ik439u_inb1)
         if (foundClient && foundClient.email) {
             dbUsername = foundClient.email.split('_inb')[0].trim();
         }
 
+        // ==========================================
+        // Fetch Purchase Date from DB
+        // ==========================================
+        let purchaseDateStr = "نامشخص (یافت نشد)";
         if (dbPool) {
             try {
-                console.log(`[DB Debug] Querying invoice for username: '${dbUsername}'`);
                 const [rows] = await dbPool.execute('SELECT time_sell FROM invoice WHERE username = ? LIMIT 1', [dbUsername]);
-                console.log(`[DB Debug] SQL Response for '${dbUsername}':`, rows);
-
                 if (rows.length > 0 && rows[0].time_sell) {
                     const timeSell = rows[0].time_sell;
                     const pDate = new Date(timeSell * 1000);
                     const { jy, jm, jd } = toJalaali(pDate.getFullYear(), pDate.getMonth() + 1, pDate.getDate());
                     purchaseDateStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd}`;
-                } else {
-                    purchaseDateStr = "ثبت نشده در ربات";
                 }
             } catch (dbErr) {
                 console.error("Database query error for purchase_date:", dbErr.message);
+                purchaseDateStr = "خطا در اتصال دیتابیس";
             }
+        } else {
+            purchaseDateStr = "دیتابیس متصل نیست";
         }
+
+        // ==========================================
+        // Fetch Last Connection from Panel API
+        // ==========================================
+        let lastConnectionStr = "متصل نشده";
+        try {
+            // A. Get Token from Sanaei /api/admin/token
+            const tokenResponse = await fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}/api/admin/token`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: qs.stringify({ username: USERNAME, password: PASSWORD })
+            });
+
+            if (tokenResponse.status === 200) {
+                const tokenData = await tokenResponse.json();
+                if (tokenData.access_token) {
+                    const panelToken = tokenData.access_token;
+
+                    // B. Get User Info from /api/user/{dbUsername}
+                    const userResponse = await fetchWithRetry(`${PROTOCOL}://${dvhost_host}:${dvhost_port}/${dvhost_path}/api/user/${dbUsername}`, {
+                        method: "GET",
+                        headers: {
+                            "Accept": "application/json",
+                            "Authorization": `Bearer ${panelToken}`
+                        }
+                    });
+
+                    if (userResponse.status === 200) {
+                        const userInfo = await userResponse.json();
+                        if (userInfo.online_at) {
+                            const onlineDt = new Date(userInfo.online_at);
+                            // Convert UTC to local format (Tehran timezone handled by server OS usually, but we display in Jalali or local string)
+                            const { jy, jm, jd } = toJalaali(onlineDt.getFullYear(), onlineDt.getMonth() + 1, onlineDt.getDate());
+                            const hours = onlineDt.getHours().toString().padStart(2, '0');
+                            const minutes = onlineDt.getMinutes().toString().padStart(2, '0');
+                            const seconds = onlineDt.getSeconds().toString().padStart(2, '0');
+                            lastConnectionStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd} ${hours}:${minutes}:${seconds}`;
+                        }
+                    } else if (userResponse.status === 404) {
+                        lastConnectionStr = "کاربر در پنل یافت نشد!";
+                    }
+                }
+            } else {
+                lastConnectionStr = "خطا در اتصال به پنل (ورود)";
+            }
+        } catch (apiErr) {
+            console.error("Panel API fetch error:", apiErr.message);
+            // Fallback to old heuristic if endpoint fails
+            lastConnectionStr = "خطا در ارتباط با پنل API";
+        }
+
+        let daysText = "نامحدود";
+        let statusText = trafficData.obj.enable ? "فعال" : "غیرفعال";
+        let isExpired = false;
 
         if (trafficData.obj.expiryTime > 0) {
             const currentTime = Date.now();
@@ -253,10 +296,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             }
         }
 
-        // Fetch explicit client stats if possible (needs Sanaei API ClientStats, but we only have traffics here, 
-        // so we can't reliably get last connection without an extra API call. For now, we mock or leave blank).
-        // Let's format expiry
-        const expiryDate = trafficData.obj.expiryTime > 0 ? new Date(trafficData.obj.expiryTime).toLocaleString('en-US', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : "بدون تاریخ اتمام";
+        const expiryDate = trafficData.obj.expiryTime > 0 ? new Date(trafficData.obj.expiryTime).toLocaleString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : "بدون تاریخ اتمام";
 
         // 2. Decode the suburl_content to pass actual links to the UI
         let linksArray = [];
