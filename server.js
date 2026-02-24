@@ -237,7 +237,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
                     const hours = pDate.getHours().toString().padStart(2, '0');
                     const minutes = pDate.getMinutes().toString().padStart(2, '0');
                     const seconds = pDate.getSeconds().toString().padStart(2, '0');
-                    purchaseDateStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd} ${hours}:${minutes}:${seconds}`;
+                    purchaseDateStr = `${hours}:${minutes}:${seconds}  ${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd}`;
                 }
             } catch (dbErr) {
                 console.error("Database query error for purchase_date:", dbErr.message);
@@ -260,7 +260,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             const hours = onlineDt.getHours().toString().padStart(2, '0');
             const minutes = onlineDt.getMinutes().toString().padStart(2, '0');
             const seconds = onlineDt.getSeconds().toString().padStart(2, '0');
-            lastConnectionStr = `${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd} ${hours}:${minutes}:${seconds}`;
+            lastConnectionStr = `${hours}:${minutes}:${seconds}  ${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd}`;
         } else {
             // Fallback heuristic if it's 0 or missing
             if ((trafficData.obj.up + trafficData.obj.down) > 0) {
