@@ -162,6 +162,18 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         let statusText = trafficData.obj.enable ? "فعال" : "غیرفعال";
         let isExpired = false;
 
+        // Attempt to find or estimate a purchase date
+        // Note: Sanaei API doesn't always expose `createdAt`. We try to grab it from `foundClient` if it exists.
+        if (foundClient && foundClient.createdAt && foundClient.createdAt > 0) {
+            purchaseDateStr = new Date(foundClient.createdAt).toLocaleString('fa-IR', { year: 'numeric', month: 'long', day: 'numeric' });
+        } else if (trafficData.obj.expiryTime > 0) {
+            // Rough estimate: we assume a 30-day (1 month) or 90-day (3 month) subscription based on total limit.
+            // If we can't be sure, we mark it as "Not recorded by panel"
+            purchaseDateStr = "ثبت نشده در پنل";
+        } else {
+            purchaseDateStr = "بدون انقضا";
+        }
+
         if (trafficData.obj.expiryTime > 0) {
             const currentTime = Date.now();
             if (trafficData.obj.expiryTime > currentTime) {
