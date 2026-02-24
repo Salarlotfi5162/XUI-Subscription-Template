@@ -137,6 +137,78 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         const expiryTimeJalali = convertToJalali(trafficData.obj.expiryTime);
         const suburl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
 
+        // --- Added Logic for Premium UI ---
+        // 1. Calculate advanced UI data from trafficData & listResult
+        let inboundsCount = 0;
+        let lastConnectionTime = 0;
+        let createdTime = Date.now(); // Fallback
+
+        listResult.obj.forEach(inbound => {
+            const settings = JSON.parse(inbound.settings);
+            const client = settings.clients.find(c => c.email === foundClient.email);
+            if (client) {
+                inboundsCount++;
+            }
+        });
+
+        const totalUsageGB = ((trafficData.obj.up + trafficData.obj.down) / 1073741824).toFixed(2);
+        const baseLimitGB = inboundsCount > 0 ? ((trafficData.obj.total / inboundsCount) / 1073741824).toFixed(2) : 0;
+        const remainingUsageGB = inboundsCount > 0 ? Math.max(0, baseLimitGB - totalUsageGB).toFixed(2) : 0;
+
+        // Try to get total configured days to calculate purchase date (approximate if expiry is set)
+        let purchaseDateStr = "نامشخص";
+        let lastConnectionStr = "نامشخص";
+        let daysText = "نامحدود";
+        let statusText = trafficData.obj.enable ? "فعال" : "غیرفعال";
+        let isExpired = false;
+
+        if (trafficData.obj.expiryTime > 0) {
+            const currentTime = Date.now();
+            if (trafficData.obj.expiryTime > currentTime) {
+                const remainingDays = Math.floor((trafficData.obj.expiryTime - currentTime) / (1000 * 60 * 60 * 24));
+                const remainingHours = Math.floor(((trafficData.obj.expiryTime - currentTime) % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                daysText = `${remainingDays} روز, ${remainingHours} ساعت`;
+            } else {
+                daysText = "منقضی شده";
+                statusText = "منقضی شده";
+                isExpired = true;
+            }
+        }
+
+        // Fetch explicit client stats if possible (needs Sanaei API ClientStats, but we only have traffics here, 
+        // so we can't reliably get last connection without an extra API call. For now, we mock or leave blank).
+        // Let's format expiry
+        const expiryDate = trafficData.obj.expiryTime > 0 ? new Date(trafficData.obj.expiryTime).toLocaleString('en-US', { month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : "بدون تاریخ اتمام";
+
+        // 2. Decode the suburl_content to pass actual links to the UI
+        let linksArray = [];
+        try {
+            const decodedContent = Buffer.from(suburl_content, 'base64').toString('utf-8');
+            const lines = decodedContent.split('\n').filter(line => line.trim().length > 0);
+
+            lines.forEach(line => {
+                if (line.startsWith('vless://') || line.startsWith('vmess://') || line.startsWith('trojan://')) {
+                    let name = "Config";
+                    try {
+                        if (line.startsWith('vmess://')) {
+                            const payload = Buffer.from(line.replace('vmess://', ''), 'base64').toString('utf-8');
+                            const parsed = JSON.parse(payload);
+                            name = parsed.ps || "Vmess Config";
+                        } else {
+                            const urlObj = new URL(line);
+                            name = decodeURIComponent(urlObj.hash.substring(1)) || "Config";
+                        }
+                    } catch (e) { } // Ignore parse errors
+                    linksArray.push({ name: name, link: line });
+                }
+            });
+        } catch (e) {
+            console.error("Error decoding config links for UI:", e);
+        }
+
+        let clientApp = userAgent.split(' ')[0] || "Browser"; // Try to guess app from user-agent
+        if (clientApp.length > 20) clientApp = clientApp.substring(0, 20); // truncate
+
         if (isBrowserRequest(userAgent)) {
             return res.render("sub", {
                 data: {
@@ -147,7 +219,19 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
                     get_backup_link: BACKUP_LINK,
                     WHATSAPP_URL,
                     TELEGRAM_URL,
-                    DEFAULT_LANG
+                    DEFAULT_LANG,
+                    // New Premium UI fields:
+                    lastConnectionStr,
+                    expiryDate,
+                    clientApp,
+                    purchaseDateStr,
+                    daysText,
+                    statusText,
+                    remainingUsageGB,
+                    baseLimitGB,
+                    totalUsageGB,
+                    inboundsCount,
+                    linksArray
                 },
             });
         }
@@ -156,7 +240,48 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             .filter(Boolean)
             .join('\n');
 
-        res.send(Buffer.from(combinedContent, 'utf-8').toString('base64'));
+        // ==== INJECT DUMMY INFO CONFIG ====
+        let finalContent = combinedContent;
+        if (!isBrowserRequest(userAgent)) {
+            try {
+                // 1. Count how many inbounds this user belongs to
+                let inboundsCount = 0;
+                listResult.obj.forEach(inbound => {
+                    const settings = JSON.parse(inbound.settings);
+                    const hasClient = settings.clients.some(c => c.email === foundClient.email);
+                    if (hasClient) inboundsCount++;
+                });
+
+                if (inboundsCount > 0) {
+                    // 2. Calculate actual base limit per inbound
+                    const totalUsageGB = ((trafficData.obj.up + trafficData.obj.down) / 1073741824).toFixed(2);
+                    const baseLimitGB = ((trafficData.obj.total / inboundsCount) / 1073741824).toFixed(2);
+
+                    // 3. Calculate remaining days
+                    let daysText = "Unlimited";
+                    if (trafficData.obj.expiryTime > 0) {
+                        const currentTime = Date.now();
+                        if (trafficData.obj.expiryTime > currentTime) {
+                            const remainingDays = Math.floor((trafficData.obj.expiryTime - currentTime) / (1000 * 60 * 60 * 24));
+                            daysText = `${remainingDays} Days`;
+                        } else {
+                            daysText = "Expired";
+                        }
+                    }
+
+                    // 4. Create dummy config
+                    const dummyName = encodeURIComponent(`⏳ ${daysText} | 📥 ${totalUsageGB}GB / ${baseLimitGB}GB`);
+                    const dummyConfig = `vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?type=tcp&security=none#${dummyName}\n`;
+
+                    finalContent = dummyConfig + finalContent;
+                }
+            } catch (calcError) {
+                console.error("Error creating dummy config:", calcError.message);
+                // Fallback to normal content if something fails
+            }
+        }
+
+        res.send(Buffer.from(finalContent, 'utf-8').toString('base64'));
     } catch (error) {
         console.error("Error:", error.message);
         res.status(500).json({ error: error.message });

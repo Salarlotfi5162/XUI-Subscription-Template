@@ -1,805 +1,845 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="fa" dir="rtl">
 
 <head>
-    <title>User information : <%= data.email %></title>
+    <title>پنل کاربری : <%= data.email %>
+    </title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="theme-color" content="#1c1f30">
-    <link rel="icon" type="image/x-icon" href="assets/img/icons/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/icons/favicon.ico" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#1a151b">
+
+    <!-- Yekan Bakh Font -->
     <link href="https://cdn.jsdelivr.net/npm/yekan-font@1.0.0/css/yekan-font.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="https://ios.v4b.top/assets/css/main.css?ver=17374638191438" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --bg-1: #0f1720;
-            --bg-2: #11151b;
-            --glass-1: rgba(255, 255, 255, 0.04);
-            --glass-2: rgba(255, 255, 255, 0.02);
-            --accent: #4cc9f0;
-            --accent-2: #6be39b;
-            --gold: #ffd24a;
-            --muted: #bec5cc;
-            --card: rgba(255, 255, 255, 0.03);
-            --radius: 16px;
-            --scrollbar-width: 8px;
-            --scrollbar-thumb: rgba(76, 201, 240, 0.3);
-            --scrollbar-thumb-hover: rgba(76, 201, 240, 0.5);
-            --scrollbar-track: rgba(255, 255, 255, 0.02);
+            --bg-color: #110e12;
+            --surface-color: #1a171d;
+            --surface-color-2: #221e25;
+            --text-primary: #f2f2f2;
+            --text-secondary: #9aa0a6;
+            --text-muted: #6b6e72;
+
+            --accent-pink: #d82b57;
+            --accent-pink-dim: rgba(216, 43, 87, 0.15);
+            --accent-hover: #f13c6b;
+
+            --border-color: rgba(255, 255, 255, 0.05);
+            --border-highlight: rgba(255, 255, 255, 0.1);
+
+            --success: #28a745;
+
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --shadow-glow: 0 0 20px rgba(216, 43, 87, 0.1);
         }
 
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
-
-        /* Custom Scrollbar - Webkit (Chrome, Edge, Safari) */
-        ::-webkit-scrollbar {
-            width: var(--scrollbar-width);
-            height: var(--scrollbar-width);
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--scrollbar-track);
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--scrollbar-thumb);
-            border-radius: 10px;
-            transition: background 0.2s ease;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--scrollbar-thumb-hover);
-        }
-
-        ::-webkit-scrollbar-corner {
-            background: transparent;
-        }
-
-        /* Custom Scrollbar - Firefox */
         * {
-            scrollbar-width: thin;
-            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        html,
-        body {
-            height: 100%;
             margin: 0;
             padding: 0;
-            direction: rtl;
-            font-family: "Yekan", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Tahoma", "Arial", sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            font-feature-settings: "kern" 1;
-            text-rendering: optimizeLegibility;
-            background: radial-gradient(800px 400px at 10% 10%, rgba(76, 201, 240, 0.05), transparent 8%),
-                        linear-gradient(180deg, var(--bg-1), var(--bg-2));
-            color: #e6eef3;
-            line-height: 1.6;
-            letter-spacing: 0.01em;
+            box-sizing: border-box;
+            font-family: 'Yekan Bakh', 'Yekan', Tahoma, Arial, sans-serif;
         }
 
         body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
             min-height: 100vh;
-            overflow-x: hidden;
+            background-image: radial-gradient(circle at 50% 0%, rgba(216, 43, 87, 0.08) 0%, transparent 60%);
         }
 
-        .container {
-            max-width: 900px;
-            width: min(900px, 94%);
-            max-height: calc(100vh - 40px);
-            margin: 64px auto;
-            padding: 34px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            overflow: auto;
-            transform: translateY(0);
-            scrollbar-width: thin;
-            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-        }
-
-        .container::-webkit-scrollbar {
-            width: var(--scrollbar-width);
-        }
-
-        .container::-webkit-scrollbar-track {
-            background: var(--scrollbar-track);
-            border-radius: 10px;
-        }
-
-        .container::-webkit-scrollbar-thumb {
-            background: var(--scrollbar-thumb);
-            border-radius: 10px;
-        }
-
-        .container::-webkit-scrollbar-thumb:hover {
-            background: var(--scrollbar-thumb-hover);
-        }
-
-        .logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.12));
-            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.7),
-                        0 0 40px rgba(76, 201, 240, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(6px) saturate(120%);
-            transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.2, 1);
-        }
-
-        .logo:hover {
-            transform: translateY(-6px) rotate(-6deg);
-        }
-
-        .logo img {
-            border-radius: 100%;
-            width: 64%;
-            height: 64%;
-            object-fit: contain;
-            filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.55));
-        }
-
-        h3 {
-            margin: 0;
-            color: var(--gold);
-            font-weight: 700;
-            font-size: 22px;
-            line-height: 1.4;
+        .header-container {
             text-align: center;
-            text-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
-            letter-spacing: 0.02em;
-            font-feature-settings: "kern" 1;
+            padding: 40px 20px 30px;
+            position: relative;
         }
 
-        .info-box {
-            width: 100%;
-            background: linear-gradient(180deg, 
-                        rgba(255, 255, 255, 0.05) 0%,
-                        rgba(255, 255, 255, 0.02) 50%,
-                        rgba(0, 0, 0, 0.1) 100%);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4),
-                        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px) saturate(150%);
+        .header-controls {
             display: flex;
-            flex-direction: column;
-            gap: 14px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .info-box:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5),
-                        0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-                        inset 0 1px 0 rgba(255, 255, 255, 0.12);
-        }
-
-        .info-box + .info-box {
-            margin-top: 12px;
-        }
-
-        .copy-container {
-            display: flex;
-            gap: 12px;
+            justify-content: center;
             align-items: center;
-            padding: 12px;
-            border-radius: 12px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(0, 0, 0, 0.06));
-            border: 1px solid rgba(255, 255, 255, 0.02);
-            transition: box-shadow 0.18s ease, transform 0.12s ease;
+            gap: 15px;
+            margin-bottom: 20px;
+            color: var(--accent-pink);
+            font-size: 20px;
         }
 
-        .copy-container:focus-within {
-            box-shadow: 0 8px 28px rgba(76, 201, 240, 0.08);
-            transform: translateY(-3px);
+        .header-controls i {
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            background: var(--accent-pink-dim);
+            transition: all 0.3s ease;
         }
 
-        #copy-textarea {
-            width: 100%;
-            height: 48px;
-            max-height: 80px;
-            resize: none;
-            border: 0;
-            outline: none;
-            background: transparent;
-            color: #d0d8e0;
-            font-size: 14px;
-            font-family: "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", "Consolas", monospace;
-            direction: ltr;
-            padding: 6px 10px;
-            border-radius: 8px;
-            overflow: auto;
-            line-height: 1.5;
-            letter-spacing: 0.01em;
-            scrollbar-width: thin;
-            scrollbar-color: var(--scrollbar-thumb) transparent;
+        .header-controls i:hover {
+            background: var(--accent-pink);
+            color: white;
+            box-shadow: 0 0 15px var(--accent-pink-dim);
         }
 
-        #copy-textarea::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        #copy-textarea::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        #copy-textarea::-webkit-scrollbar-thumb {
-            background: var(--scrollbar-thumb);
-            border-radius: 3px;
-        }
-
-        #copy-textarea::-webkit-scrollbar-thumb:hover {
-            background: var(--scrollbar-thumb-hover);
-        }
-
-        .copy-icon {
-            width: 50px;
-            height: 50px;
-            min-width: 50px;
+        .main-title {
+            font-size: 38px;
+            font-weight: 800;
+            margin-bottom: 5px;
+            color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.14s ease, box-shadow 0.12s ease;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.06));
-            border: 1px solid rgba(255, 255, 255, 0.02);
-            box-shadow: 0 8px 22px rgba(2, 6, 15, 0.6);
+            gap: 10px;
         }
 
-        .copy-icon i {
-            color: var(--muted);
-            font-size: 16px;
+        .main-title span {
+            color: var(--accent-pink);
         }
 
-        .copy-icon:active {
-            transform: scale(0.98);
+        .main-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
         }
 
-        .info-item {
+        /* Card Styles */
+        .card {
+            background-color: var(--surface-color);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
             display: flex;
-            gap: 16px;
             align-items: center;
-            padding: 18px 20px;
-            border-radius: 16px;
-            background: linear-gradient(135deg,
-                        rgba(255, 255, 255, 0.03) 0%,
-                        rgba(255, 255, 255, 0.01) 50%,
-                        rgba(0, 0, 0, 0.05) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.5s ease-out backwards;
+            justify-content: flex-start;
+            gap: 10px;
+            margin-bottom: 25px;
+            font-size: 22px;
+            font-weight: bold;
+            flex-direction: row-reverse;
         }
 
-        .info-item:nth-child(1) { animation-delay: 0.1s; }
-        .info-item:nth-child(2) { animation-delay: 0.2s; }
-        .info-item:nth-child(3) { animation-delay: 0.3s; }
-        .info-item:nth-child(4) { animation-delay: 0.4s; }
+        .card-header-dot {
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent-pink);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-pink);
+        }
 
-        @keyframes fadeInUp {
+        /* Grid Layout for Service Info */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-row {
+            background-color: var(--surface-color-2);
+            border-radius: var(--radius-md);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            transition: border-color 0.3s;
+        }
+
+        .info-row:hover {
+            border-color: var(--border-highlight);
+        }
+
+        .info-label {
+            color: var(--text-primary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-label i {
+            color: var(--text-secondary);
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .info-value {
+            color: var(--text-secondary);
+            font-size: 14px;
+            text-align: left;
+            direction: ltr;
+        }
+
+        .info-value.active {
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-value.active::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Stats Blocks */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .stat-block {
+            background-color: var(--surface-color-2);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            padding: 20px 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent-pink);
+            direction: ltr;
+        }
+
+        /* Tabs Section */
+        .tabs-nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 8px 16px;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-pink);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -16px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--accent-pink);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
 
-        .info-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg,
-                        transparent,
-                        rgba(76, 201, 240, 0.3),
-                        transparent);
-            opacity: 0;
-            transition: opacity 0.25s ease;
-        }
-
-        .info-item:hover {
-            transform: translateY(-3px);
-            background: linear-gradient(135deg,
-                        rgba(255, 255, 255, 0.05) 0%,
-                        rgba(255, 255, 255, 0.02) 50%,
-                        rgba(0, 0, 0, 0.08) 100%);
-            border-color: rgba(76, 201, 240, 0.2);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3),
-                        0 0 0 1px rgba(76, 201, 240, 0.1) inset;
-        }
-
-        .info-item:hover::before {
-            opacity: 1;
-        }
-
-        .info-item i {
-            width: 56px;
-            height: 56px;
-            min-width: 56px;
-            border-radius: 14px;
+        /* Configs List */
+        .config-list {
             display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .config-item {
+            background-color: var(--surface-color-2);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            color: var(--accent);
-            background: linear-gradient(135deg,
-                        rgba(76, 201, 240, 0.15) 0%,
-                        rgba(107, 227, 155, 0.1) 100%);
-            border: 1px solid rgba(76, 201, 240, 0.2);
-            box-shadow: 0 4px 12px rgba(76, 201, 240, 0.15),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-        }
-
-        .info-item:hover i {
-            transform: scale(1.05) rotate(2deg);
-            background: linear-gradient(135deg,
-                        rgba(76, 201, 240, 0.2) 0%,
-                        rgba(107, 227, 155, 0.15) 100%);
-            box-shadow: 0 6px 16px rgba(76, 201, 240, 0.25),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        }
-
-        .info-item p {
-            margin: 0;
-            flex: 1;
-            color: #e8eef3;
-            font-size: 15px;
-            line-height: 1.7;
-            letter-spacing: 0.01em;
-            font-weight: 500;
-        }
-
-        .info-item p small {
-            color: var(--muted);
-            display: block;
-            margin-top: 4px;
-            font-size: 13px;
-            line-height: 1.6;
-            letter-spacing: 0.01em;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        .gb-value {
-            direction: ltr;
-            display: inline-block;
-            unicode-bidi: embed;
-            font-family: "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", "Consolas", monospace;
-            font-weight: 600;
-            color: #4cc9f0;
-            letter-spacing: 0.03em;
-            padding: 2px 8px;
-            border-radius: 6px;
-            background: rgba(76, 201, 240, 0.1);
-            border: 1px solid rgba(76, 201, 240, 0.2);
             transition: all 0.2s ease;
         }
 
-        .info-item:hover .gb-value {
-            background: rgba(76, 201, 240, 0.15);
-            border-color: rgba(76, 201, 240, 0.3);
-            color: #5dd0f5;
-            transform: scale(1.02);
+        .config-item:hover {
+            border-color: var(--accent-pink-dim);
+            background-color: rgba(255, 255, 255, 0.02);
         }
 
-        .action-buttons {
-            width: 100%;
+        .config-name {
             display: flex;
-            gap: 14px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 6px;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            color: var(--text-primary);
+            direction: ltr;
         }
 
-        .action-btn {
-            display: inline-flex;
+        .config-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-icon {
+            color: var(--accent-pink);
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, color 0.2s;
+            background: var(--accent-pink-dim);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .action-icon:hover {
+            transform: scale(1.1);
+            color: var(--text-primary);
+            background: var(--accent-pink);
+        }
+
+        /* Apps Section */
+        .apps-container {
+            display: flex;
+            gap: 20px;
+            min-height: 300px;
+        }
+
+        .os-tabs {
+            width: 180px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-left: 1px solid var(--border-color);
+            padding-left: 15px;
+        }
+
+        .os-tab {
+            background: transparent;
+            border: 1px solid transparent;
+            padding: 12px 15px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            justify-content: flex-end;
             align-items: center;
             gap: 10px;
-            padding: 12px 20px;
-            border-radius: 999px;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 15px;
-            letter-spacing: 0.02em;
-            line-height: 1.4;
-            box-shadow: 0 12px 34px rgba(3, 7, 18, 0.6);
-            transition: transform 0.14s ease, box-shadow 0.14s ease;
-            border: 0;
-        }
-
-        .action-btn i {
             font-size: 16px;
-            opacity: 0.95;
+            transition: all 0.2s;
         }
 
-        .action-btn:hover {
-            transform: translateY(-6px);
+        .os-tab:hover {
+            background: var(--surface-color-2);
         }
 
-        .btn-telegram {
-            background: linear-gradient(90deg, #3aa0ff 0%, #0e66d6 100%);
+        .os-tab.active {
+            color: var(--text-primary);
+            background: var(--surface-color-2);
+            border-bottom: 2px solid var(--accent-pink);
         }
 
-        .btn-whatsapp {
-            background: linear-gradient(90deg, #34d058 0%, #12b24a 100%);
+        .os-tab i {
+            font-size: 20px;
         }
 
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
+        /* Colors for OS icons */
+        .os-tab i.fa-apple {
+            color: #a6b1b7;
+        }
+
+        .os-tab i.fa-android {
+            color: #3DDC84;
+        }
+
+        .os-tab i.fa-windows {
+            color: #00a4ef;
+        }
+
+        .os-tab i.fa-linux {
+            color: #fcc624;
+        }
+
+        .apps-list {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .apps-list.active {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(2, 6, 15, 0.75);
-            backdrop-filter: blur(8px);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-                        backdrop-filter 0.25s ease;
-            z-index: 1000;
         }
 
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal {
-            background: linear-gradient(180deg, 
-                        rgba(255, 255, 255, 0.08) 0%,
-                        rgba(255, 255, 255, 0.03) 100%);
-            padding: 32px 28px;
-            border-radius: 20px;
-            min-width: 280px;
-            max-width: 90%;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8),
-                        0 0 0 1px rgba(255, 255, 255, 0.05),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            color: var(--muted);
-            transform: scale(0.9) translateY(10px);
-            opacity: 0;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(20px) saturate(180%);
-        }
-
-        .modal-overlay.active .modal {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
-
-        .modal-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 20px;
+        .app-item {
+            background-color: var(--surface-color-2);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: linear-gradient(135deg, 
-                        rgba(76, 201, 240, 0.2) 0%,
-                        rgba(107, 227, 155, 0.15) 100%);
-            border: 2px solid rgba(76, 201, 240, 0.3);
-            animation: checkmarkPulse 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .modal-icon i {
-            font-size: 32px;
-            color: var(--accent);
-            animation: checkmarkScale 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s both;
+        .app-name {
+            font-size: 16px;
+            color: var(--text-primary);
+            direction: ltr;
         }
 
-        @keyframes checkmarkPulse {
-            0% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.1);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        @keyframes checkmarkScale {
-            0% {
-                transform: scale(0);
-            }
-            50% {
-                transform: scale(1.2);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .modal p {
-            margin: 0 0 24px 0;
-            font-family: "Yekan", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Tahoma", "Arial", sans-serif;
-            font-weight: 600;
-            font-size: 18px;
-            line-height: 1.5;
-            letter-spacing: 0.01em;
-            color: #e8eef3;
-        }
-
-        .modal button {
-            background: linear-gradient(135deg, var(--accent) 0%, #3ba8d0 100%);
-            color: #06202a;
-            border: 0;
-            padding: 12px 32px;
-            border-radius: 12px;
+        .download-icon {
+            color: var(--accent-pink);
+            font-size: 20px;
             cursor: pointer;
-            font-family: "Yekan", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Tahoma", "Arial", sans-serif;
-            font-weight: 600;
-            font-size: 15px;
-            letter-spacing: 0.02em;
-            line-height: 1.4;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 16px rgba(76, 201, 240, 0.3),
-                        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-            min-width: 120px;
+            transition: transform 0.2s;
         }
 
-        .modal button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(76, 201, 240, 0.4),
-                        0 0 0 1px rgba(255, 255, 255, 0.15) inset;
-            background: linear-gradient(135deg, #5dd0f5 0%, #4bb8e0 100%);
+        .download-icon:hover {
+            transform: scale(1.1);
+            color: var(--accent-hover);
         }
 
-        .modal button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 8px rgba(76, 201, 240, 0.3),
-                        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        /* Modals and Toasts */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface-color-2);
+            color: var(--text-primary);
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 1px solid var(--accent-pink);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        @media (max-width: 720px) {
-            .container {
-                margin: 30px 18px;
-                padding: 20px;
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            color: var(--success);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
             }
 
-            .logo {
-                width: 98px;
-                height: 98px;
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
             }
 
-            .copy-icon {
-                width: 46px;
-                height: 46px;
-                min-width: 46px;
+            .apps-container {
+                flex-direction: column;
             }
 
-            .info-box {
-                padding: 16px;
-                gap: 12px;
-                border-radius: 16px;
+            .os-tabs {
+                width: 100%;
+                flex-direction: row;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding-right: 0;
+                padding-bottom: 10px;
+                justify-content: space-between;
+                overflow-x: auto;
             }
 
-            .info-item {
-                padding: 14px 16px;
-                gap: 12px;
-                border-radius: 14px;
-            }
-
-            .info-item i {
-                width: 48px;
-                height: 48px;
-                min-width: 48px;
-                font-size: 20px;
-                border-radius: 12px;
-            }
-
-            .info-item p {
-                font-size: 14px;
-            }
-
-            .gb-value {
-                font-size: 13px;
-                padding: 2px 6px;
+            .os-tab {
+                flex: 1;
+                justify-content: center;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="logo">
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTumgBZSlZ1HxjNuj4oaHaPkR5EzlL9UQpOMA&s"
-                alt="لوگو ققنوس">
+
+    <div class="header-container">
+        <!-- Optional controls at the top -->
+        <div class="header-controls">
+            <i class="fas fa-sliders-h"></i>
+            <i class="fas fa-moon"></i>
+            <i class="fas fa-cog"></i>
+            <i class="fas fa-arrow-right"></i>
         </div>
 
-        <h3>شناسه <%= data.email %> خوش آمدید</h3>
+        <h1 class="main-title">
+            به پنل کاربری خوش آمدید<span>!</span>
+        </h1>
+    </div>
 
-        <div class="info-box">
-            <div class="copy-container">
-                <textarea id="copy-textarea" rows="2"><%= data.suburl %></textarea>
-                <div class="copy-icon" onclick="copyToClipboard()">
-                    <i class="fas fa-copy"></i>
+    <div class="main-container">
+        <!-- Service Info Card -->
+        <div class="card">
+            <div class="card-header">
+                <span>اطلاعات سرویس</span>
+                <div class="card-header-dot"></div>
+            </div>
+
+            <div class="info-grid">
+                <!-- Column 1 -->
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-edit"></i> نام سرویس :</span>
+                    <span class="info-value">
+                        <%= data.email %>
+                    </span>
+                </div>
+                <!-- Column 2 -->
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-info-circle"></i> آخرین اتصال :</span>
+                    <span class="info-value">
+                        <%= data.lastConnectionStr %>
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-calendar-alt"></i> تاریخ اتمام :</span>
+                    <span class="info-value">
+                        <%= data.expiryDate %>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-power-off"></i> وضعیت سرویس :</span>
+                    <span class="info-value <%= data.enable ? 'active' : '' %>">
+                        <%= data.statusText %>
+                    </span>
+                </div>
+
+                <!-- Full width for Last App -->
+                <div class="info-row" style="grid-column: 1 / -1;">
+                    <span class="info-label"><i class="fas fa-desktop"></i> آخرین برنامه متصل شده :</span>
+                    <span class="info-value">
+                        <%= data.clientApp %>
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-calendar-alt"></i> تاریخ خرید :</span>
+                    <span class="info-value">
+                        <%= data.purchaseDateStr %>
+                    </span>
+                </div>
+                <!-- For the screenshot "حجم خریداری شده", we show total base limit -->
+                <div class="info-row">
+                    <span class="info-label"><i class="fas fa-spinner"></i> حجم خریداری شده :</span>
+                    <span class="info-value">
+                        <%= data.baseLimitGB> 0 ? data.baseLimitGB + ' GB' : 'نامحدود' %>
+                    </span>
                 </div>
             </div>
+
+            <!-- Stats Bottom Row -->
+            <div class="stats-grid">
+                <div class="stat-block">
+                    <span class="stat-label">مدت باقی مانده از اعتبار</span>
+                    <span class="stat-value" style="font-size: 16px;">
+                        <%= data.daysText %>
+                    </span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">تعداد کاربر</span>
+                    <span class="stat-value"><i class="fas fa-infinity" style="font-size: 24px;"></i></span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">حجم مصرف شده</span>
+                    <span class="stat-value">
+                        <%= data.totalUsageGB %> GB
+                    </span>
+                </div>
+                <div class="stat-block">
+                    <span class="stat-label">حجم باقی مانده</span>
+                    <span class="stat-value">
+                        <%= data.baseLimitGB> 0 ? data.remainingUsageGB + ' GB' : '∞' %>
+                    </span>
+                </div>
+            </div>
+
         </div>
 
-        <div class="info-box">
-            <div class="info-item">
-                <i class="fas fa-hourglass-half"></i>
-                <p>وضعیت اکانت: <%= data.enable ? 'فعال' : 'غیرفعال' %></p>
+        <!-- Details Card -->
+        <div class="card" style="padding-top: 50px; position: relative;">
+
+            <div class="card-header" style="position: absolute; top: 25px; right: 25px;">
+                <span>کانفیگ ها</span>
+                <div class="card-header-dot"></div>
             </div>
 
-            <div class="info-item">
-                <i class="fas fa-calendar-alt"></i>
-                <p>
-                    روزهای باقیمانده:
-                    <%
-                    try {
-                        if (!data || typeof data.expiryTime === 'undefined') {
-                            throw new Error("data یا expiryTime تعریف نشده است.");
-                        }
-                        const expiryTime = parseInt(data.expiryTime, 10);
-                        if (isNaN(expiryTime)) {
-                            throw new Error("expiryTime یک عدد معتبر نیست.");
-                        }
-                        const currentTime = Date.now();
-                        if (expiryTime === 0) {
-                            %>
-                            بدون محدودیت
-                            <%
-                        } else if (expiryTime > currentTime) {
-                            const remainingDays = Math.floor((expiryTime - currentTime) / (1000 * 60 * 60 * 24));
-                            %>
-                            <%= remainingDays %> روز
-                            <%
-                        } else {
-                            %>
-                            منقضی شده
-                            <%
-                        }
-                    } catch (error) {
-                        console.error("خطا در محاسبه روزهای باقیمانده:", error.message);
-                        %>
-                        نامشخص
-                        <%
-                    }
-                    %>
-                </p>
+            <!-- Tabs Navigation -->
+            <div class="tabs-nav">
+                <button class="tab-btn" onclick="openTab('apps-tab')">برنامه ها</button>
+                <button class="tab-btn" onclick="openTab('add-sub-tab')">افزودن سابسکریپشن</button>
+                <button class="tab-btn active" onclick="openTab('links-tab')">لینک ها</button>
             </div>
 
-            <div class="info-item">
-                <i class="fas fa-chart-pie"></i>
-                <p>
-                    حجم مصرفی:
-                    <span class="gb-value"><%= ((data.up + data.down) / 1_073_741_824).toFixed(2) %> GB</span>
-                </p>
+            <!-- Links Tab -->
+            <div id="links-tab" class="tab-content active">
+                <div class="config-list">
+                    <!-- Global Sub Link at the top -->
+                    <% if(data.linksArray && data.linksArray.length> 0) { %>
+                        <div class="config-item" style="border-color: var(--accent-pink);">
+                            <div class="config-actions">
+                                <div class="action-icon" onclick="copyText('<%= data.suburl %>')">
+                                    <i class="fas fa-clipboard"></i>
+                                </div>
+                                <div class="action-icon">
+                                    <i class="fas fa-qrcode"></i>
+                                </div>
+                            </div>
+                            <div class="config-name">
+                                <span>لینک سابسکریپشن (بروزرسانی خودکار)</span>
+                                <i class="fas fa-sync" style="color: var(--accent-pink);"></i>
+                            </div>
+                        </div>
+
+                        <% data.linksArray.forEach(function(config) { %>
+                            <div class="config-item">
+                                <div class="config-actions">
+                                    <div class="action-icon" onclick="copyText('<%= config.link %>')">
+                                        <i class="fas fa-clipboard"></i>
+                                    </div>
+                                    <div class="action-icon">
+                                        <i class="fas fa-qrcode"></i>
+                                    </div>
+                                </div>
+                                <div class="config-name">
+                                    <span>
+                                        <%= config.name %>
+                                    </span>
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                            </div>
+                            <% }); %>
+                                <% } else { %>
+                                    <div class="config-item" style="justify-content: center;">
+                                        <span class="config-name">هیچ کانفیگی یافت نشد.</span>
+                                    </div>
+                                    <% } %>
+                </div>
             </div>
 
-            <div class="info-item">
-                <i class="fas fa-database"></i>
-                <p>
-                    حجم خریداری شده:
-                    <span class="gb-value"><%= (data.total / 1_073_741_824).toFixed(2) %> GB</span>
-                </p>
+            <!-- Add Sub Tab -->
+            <div id="add-sub-tab" class="tab-content">
+                <div style="text-align: center; color: var(--text-secondary); padding: 40px;">
+                    <i class="fas fa-link" style="font-size: 40px; margin-bottom: 20px; color: var(--accent-pink);"></i>
+                    <h3>لینک اشتراک شما</h3>
+                    <p
+                        style="margin-top: 10px; direction: ltr; background: var(--surface-color-2); padding: 15px; border-radius: var(--radius-sm); word-break: break-all; border: 1px solid var(--border-color);">
+                        <%= data.suburl %>
+                    </p>
+                    <button onclick="copyText('<%= data.suburl %>')"
+                        style="margin-top: 20px; background: var(--accent-pink); color: white; border: none; padding: 10px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; font-family: inherit;">کپی
+                        لینک</button>
+                </div>
             </div>
-        </div>
 
-        <div class="action-buttons">
-            <a href="<%= data.TELEGRAM_URL %>?text=سلام من شناسه <%= data.email %> هستم" class="action-btn"
-                style="background: linear-gradient(145deg, #007BFF, #0056b3);">
-                <i class="fas fa-headset"></i>
-                پشتیبانی در تلگرام
-            </a>
+            <!-- Apps Tab -->
+            <div id="apps-tab" class="tab-content">
+                <div class="apps-container">
+
+                    <div class="apps-list active" id="app-apple">
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://apps.apple.com/us/app/v2box-v2ray-client/id6446814690', '_blank')"></i>
+                            <span class="app-name">V2box</span>
+                        </div>
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://apps.apple.com/us/app/streisand/id6450534064', '_blank')"></i>
+                            <span class="app-name">Streisand</span>
+                        </div>
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://apps.apple.com/us/app/shadowrocket/id932747118', '_blank')"></i>
+                            <span class="app-name">Shadowrocket</span>
+                        </div>
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://apps.apple.com/us/app/sing-box/id6451272873', '_blank')"></i>
+                            <span class="app-name">SingBox</span>
+                        </div>
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://apps.apple.com/us/app/foxray/id6448898396', '_blank')"></i>
+                            <span class="app-name">FoXray</span>
+                        </div>
+                    </div>
+
+                    <div class="apps-list" id="app-android">
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://play.google.com/store/apps/details?id=com.v2ray.ang', '_blank')"></i>
+                            <span class="app-name">v2rayNG</span>
+                        </div>
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://play.google.com/store/apps/details?id=com.github.kr328.clash', '_blank')"></i>
+                            <span class="app-name">Clash</span>
+                        </div>
+                    </div>
+
+                    <div class="apps-list" id="app-windows">
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://github.com/2dust/v2rayN/releases', '_blank')"></i>
+                            <span class="app-name">v2rayN</span>
+                        </div>
+                    </div>
+
+                    <div class="apps-list" id="app-linux">
+                        <div class="app-item">
+                            <i class="fas fa-cloud-download-alt download-icon"
+                                onclick="window.open('https://github.com/2dust/v2rayN/releases', '_blank')"></i>
+                            <span class="app-name">Nekoray</span>
+                        </div>
+                    </div>
+
+                    <!-- OS Navigator -->
+                    <div class="os-tabs">
+                        <div class="os-tab active" onclick="openOsTab('app-apple', this)">
+                            <span>اپل</span>
+                            <i class="fab fa-apple"></i>
+                        </div>
+                        <div class="os-tab" onclick="openOsTab('app-android', this)">
+                            <span>اندروید</span>
+                            <i class="fab fa-android"></i>
+                        </div>
+                        <div class="os-tab" onclick="openOsTab('app-windows', this)">
+                            <span>ویندوز</span>
+                            <i class="fab fa-windows"></i>
+                        </div>
+                        <div class="os-tab" onclick="openOsTab('app-linux', this)">
+                            <span>لینوکس</span>
+                            <i class="fab fa-linux"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
-        <div class="modal" onclick="event.stopPropagation()">
-            <div class="modal-icon">
-                <i class="fas fa-check"></i>
-            </div>
-            <p>لینک شما کپی شد</p>
-            <button onclick="closeModal()">باشه</button>
-        </div>
+    <div class="toast" id="copyToast">
+        <i class="fas fa-check-circle"></i> با موفقیت کپی شد!
     </div>
 
     <script>
-        let modalTimeout = null;
+        // Main Tabs Logic
+        function openTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Remove active class from buttons
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active');
+            });
 
-        async function copyToClipboard() {
-            const textarea = document.getElementById("copy-textarea");
-            const textToCopy = textarea.value;
-
-            try {
-                await navigator.clipboard.writeText(textToCopy);
-                showModal();
-            } catch (err) {
-                // Fallback for older browsers
-                const tempTextarea = document.createElement("textarea");
-                tempTextarea.value = textToCopy;
-                tempTextarea.style.position = "fixed";
-                tempTextarea.style.opacity = "0";
-                document.body.appendChild(tempTextarea);
-                tempTextarea.select();
-                document.execCommand("copy");
-                document.body.removeChild(tempTextarea);
-
-                showModal();
-            }
+            // Show selected content and activate button
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
         }
 
-        function showModal() {
-            const modal = document.getElementById("modal-overlay");
-            modal.classList.add("active");
-            
-            // Clear any existing timeout
-            if (modalTimeout) {
-                clearTimeout(modalTimeout);
-            }
-            
-            // Auto-close after 3 seconds
-            modalTimeout = setTimeout(() => {
-                closeModal();
+        // OS Tabs Logic (inside Apps Tab)
+        function openOsTab(osId, btnElement) {
+            // Hide all app lists
+            document.querySelectorAll('.apps-list').forEach(el => {
+                el.classList.remove('active');
+            });
+            // Remove active class from OS tabs
+            document.querySelectorAll('.os-tab').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected app list and activate OS tab
+            document.getElementById(osId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+
+        // Copy Text Logic
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                // Fallback method
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast();
+                } catch (err) {
+                    console.error('Fallback failed', err);
+                }
+                document.body.removeChild(textArea);
+            });
+        }
+
+        function showToast() {
+            const toast = document.getElementById("copyToast");
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
             }, 3000);
         }
-
-        function closeModal() {
-            const modal = document.getElementById("modal-overlay");
-            modal.classList.remove("active");
-            
-            if (modalTimeout) {
-                clearTimeout(modalTimeout);
-                modalTimeout = null;
-            }
-        }
-
-        function closeModalOnOverlay(event) {
-            if (event.target === event.currentTarget) {
-                closeModal();
-            }
-        }
-
-        // Close modal on Escape key
-        document.addEventListener("keydown", function(event) {
-            if (event.key === "Escape") {
-                closeModal();
-            }
-        });
     </script>
 </body>
 
