@@ -230,11 +230,16 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         }
 
         // ==========================================
-        // Fetch Last Connection from Panel API
+        // Fetch Last Connection Heuristic
         // ==========================================
-        // پنل‌های سنایی و علیرضا اندپوینت مستقیمی برای دریافت دقیق زمان آخرین اتصال مثل مرزبان ندارند.
-        // تا زمان اضافه شدن این قابلیت به وب‌سرویس اصلی XUI، این مقدار نامشخص خواهد بود
-        let lastConnectionStr = "نامشخص";
+        // پنل‌های سنایی و خیدی اندپوینت مستقیمی برای دریافت دقیق زمان آخرین اتصال ندارند.
+        // بر اساس منطق ارائه شده توسط کاربر، از مصرف ترافیک برای تشخیص اتصال استفاده می‌کنیم:
+        let lastConnectionStr = "متصل نشده";
+        if ((trafficData.obj.up + trafficData.obj.down) > 0) {
+            lastConnectionStr = "در حال استفاده (جزئیات نامشخص)";
+        } else {
+            lastConnectionStr = "تاکنون متصل نشده است";
+        }
 
         let daysText = "نامحدود";
         let statusText = trafficData.obj.enable ? "فعال" : "غیرفعال";
