@@ -282,7 +282,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
                     }
 
                     // 4. Create dummy config
-                    const dummyName = encodeURIComponent(`⏳ ${daysText} | 📥 ${totalUsageGB}GB / ${baseLimitGB}GB`);
+                    const dummyName = encodeURIComponent(`📥 ${totalUsageGB}GB / ${baseLimitGB}GB | ⏳ ${daysText}`);
                     const dummyConfig = `vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?type=tcp&security=none#${dummyName}\n`;
 
                     finalContent = dummyConfig + finalContent;
