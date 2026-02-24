@@ -407,8 +407,9 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
 
         res.send(Buffer.from(finalContent, 'utf-8').toString('base64'));
     } catch (error) {
-        console.error("Error:", error.message);
-        res.status(500).json({ error: error.message });
+        const logMsg = `[${new Date().toISOString()}] Server Error (SubID: ${req.params.subId}): ${error.message}\n${error.stack}\n`;
+        fs.appendFile(path.join(__dirname, 'db_errors.log'), logMsg, () => { });
+        res.status(500).json({ error: "خطای داخلی سرور رخ داده است. لطفاً به پشتیبانی اطلاع دهید." });
     }
 });
 
