@@ -147,12 +147,21 @@
             box-shadow: var(--shadow-sm);
         }
 
+        .card-header-wrapper {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            /* Thin white/transparent line */
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
         .card-header {
             display: inline-flex;
             align-items: center;
             justify-content: flex-end;
             gap: 12px;
-            margin-bottom: 25px;
             font-size: 20px;
             font-weight: bold;
             flex-direction: row-reverse;
@@ -659,9 +668,11 @@
     <div class="main-container">
         <!-- Service Info Card -->
         <div class="card" style="display: flex; flex-direction: column; align-items: flex-end;">
-            <div class="card-header">
-                <span>اطلاعات سرویس</span>
-                <div class="card-header-dot"></div>
+            <div class="card-header-wrapper">
+                <div class="card-header">
+                    <span>اطلاعات سرویس</span>
+                    <div class="card-header-dot"></div>
+                </div>
             </div>
 
             <div class="info-grid" style="width: 100%;">
@@ -747,9 +758,11 @@
         <!-- Details Card -->
         <div class="card" style="display: flex; flex-direction: column; align-items: flex-end;">
 
-            <div class="card-header" style="margin-bottom: 30px;">
-                <span>کانفیگ ها</span>
-                <div class="card-header-dot"></div>
+            <div class="card-header-wrapper">
+                <div class="card-header">
+                    <span>کانفیگ ها</span>
+                    <div class="card-header-dot"></div>
+                </div>
             </div>
 
             <!-- Tabs Navigation -->
