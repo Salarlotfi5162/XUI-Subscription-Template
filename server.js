@@ -226,7 +226,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         // ==========================================
         // Fetch Purchase Date from DB
         // ==========================================
-        let purchaseDateStr = "نامشخص (یافت نشد)";
+        let purchaseDateStr = "نامشخص";
         if (dbPool) {
             try {
                 const [rows] = await dbPool.execute('SELECT time_sell FROM invoice WHERE username = ? LIMIT 1', [dbUsername]);
@@ -240,11 +240,14 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
                     purchaseDateStr = `${hours}:${minutes}:${seconds}  ${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd}`;
                 }
             } catch (dbErr) {
-                console.error("Database query error for purchase_date:", dbErr.message);
-                purchaseDateStr = "خطا در اتصال دیتابیس";
+                const logMsg = `[${new Date().toISOString()}] DB Query Error (${dbUsername}): ${dbErr.message}\n`;
+                fs.appendFile(path.join(__dirname, 'db_errors.log'), logMsg, () => { });
+                purchaseDateStr = "ثبت نشده"; // Clean UI fallback
             }
         } else {
-            purchaseDateStr = "دیتابیس متصل نیست";
+            const logMsg = `[${new Date().toISOString()}] DB Connection Error (${dbUsername}): Pool is not connected.\n`;
+            fs.appendFile(path.join(__dirname, 'db_errors.log'), logMsg, () => { });
+            purchaseDateStr = "ثبت نشده"; // Clean UI fallback
         }
 
         // ==========================================
