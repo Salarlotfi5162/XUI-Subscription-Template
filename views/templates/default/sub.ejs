@@ -8,8 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="theme-color" content="#1a151b">
 
-    <!-- Yekan Bakh Font -->
-    <link href="https://cdn.jsdelivr.net/npm/yekan-font@1.0.0/css/yekan-font.min.css" rel="stylesheet">
+    <!-- Vazirmatn Font -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.0/Vazirmatn-font-face.css" rel="stylesheet"
+        type="text/css" />
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- QRCode.js -->
@@ -39,13 +40,42 @@
 
             --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
             --shadow-glow: 0 0 20px rgba(216, 43, 87, 0.1);
+            --shadow-glow: 0 0 20px rgba(216, 43, 87, 0.1);
+        }
+
+        @keyframes pulsePink {
+            0% {
+                box-shadow: 0 0 0 0 rgba(216, 43, 87, 0.8);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(216, 43, 87, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(216, 43, 87, 0);
+            }
+        }
+
+        @keyframes pulseGreen {
+            0% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.8);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Yekan Bakh', 'Yekan', Tahoma, Arial, sans-serif;
+            font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
         }
 
         body {
@@ -133,7 +163,7 @@
             height: 10px;
             background-color: var(--accent-pink);
             border-radius: 50%;
-            box-shadow: 0 0 8px var(--accent-pink);
+            animation: pulsePink 2s infinite;
         }
 
         /* Grid Layout for Service Info */
@@ -195,6 +225,7 @@
             background-color: var(--success);
             border-radius: 50%;
             display: inline-block;
+            animation: pulseGreen 2s infinite;
         }
 
         /* Stats Blocks */
