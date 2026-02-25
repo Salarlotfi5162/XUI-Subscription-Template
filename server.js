@@ -202,6 +202,9 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         // 1. Calculate advanced UI data from trafficData & listResult
         let inboundsCount = 0;
         let lastConnectionTime = 0; // Will hold the max lastOnline among all inbounds
+        let sumUp = 0;
+        let sumDown = 0;
+        let maxTotal = 0;
 
         listResult.obj.forEach(inbound => {
             const settings = JSON.parse(inbound.settings);
@@ -213,8 +216,15 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             // In Sanaei, clientStats array holds the traffic/online status for each client
             if (inbound.clientStats) {
                 const cStats = inbound.clientStats.find(c => c.email === foundClient.email);
-                if (cStats && cStats.lastOnline && cStats.lastOnline > lastConnectionTime) {
-                    lastConnectionTime = cStats.lastOnline;
+                if (cStats) {
+                    if (cStats.lastOnline && cStats.lastOnline > lastConnectionTime) {
+                        lastConnectionTime = cStats.lastOnline;
+                    }
+                    if (cStats.up) sumUp += cStats.up;
+                    if (cStats.down) sumDown += cStats.down;
+                    if (cStats.total && cStats.total > maxTotal) {
+                        maxTotal = cStats.total;
+                    }
                 }
             } else if (client && client.lastOnline) {
                 // Fallback in case they store it directly in the client settings rather than clientStats
@@ -224,9 +234,9 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             }
         });
 
-        const finalUp = trafficData.obj.up || 0;
-        const finalDown = trafficData.obj.down || 0;
-        const finalTotal = trafficData.obj.total || 0;
+        const finalUp = sumUp > 0 || sumDown > 0 ? sumUp : (trafficData.obj.up || 0);
+        const finalDown = sumUp > 0 || sumDown > 0 ? sumDown : (trafficData.obj.down || 0);
+        const finalTotal = maxTotal > 0 ? maxTotal : (trafficData.obj.total || 0);
 
         const totalUsageGB = ((finalUp + finalDown) / 1073741824).toFixed(2);
         const baseLimitGB = (finalTotal / 1073741824).toFixed(2);
