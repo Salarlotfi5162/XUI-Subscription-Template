@@ -263,8 +263,8 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         }
 
         const totalUsageGB = ((finalUp + finalDown) / 1073741824).toFixed(2);
-        const baseLimitGB = (finalTotal / 1073741824).toFixed(2);
-        const remainingUsageGB = Math.max(0, baseLimitGB - totalUsageGB).toFixed(2);
+        const baseLimitGB = inboundsCount > 0 ? ((finalTotal / inboundsCount) / 1073741824).toFixed(2) : 0;
+        const remainingUsageGB = inboundsCount > 0 ? Math.max(0, baseLimitGB - totalUsageGB).toFixed(2) : 0;
 
         let dbUsername = targetSubId;
         if (foundClient && foundClient.email) {
