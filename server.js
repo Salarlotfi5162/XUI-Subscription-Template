@@ -200,21 +200,16 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
 
         // --- Added Logic for Premium UI ---
         // 1. Calculate advanced UI data from trafficData & listResult
-        let inboundsCount = 0;
         let lastConnectionTime = 0; // Will hold the max lastOnline among all inbounds
 
         listResult.obj.forEach(inbound => {
             const settings = JSON.parse(inbound.settings);
             const client = settings.clients.find(c => c.email === foundClient.email);
-            if (client) {
-                inboundsCount++;
-            }
 
             // In Sanaei, clientStats array holds the traffic/online status for each client
             if (inbound.clientStats) {
                 const cStats = inbound.clientStats.find(c => c.email === foundClient.email);
                 if (cStats && cStats.lastOnline && cStats.lastOnline > lastConnectionTime) {
-                    // It's possible the user is in multiple inbounds, we take the most recent online time
                     lastConnectionTime = cStats.lastOnline;
                 }
             } else if (client && client.lastOnline) {
@@ -225,9 +220,13 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             }
         });
 
-        const totalUsageGB = ((trafficData.obj.up + trafficData.obj.down) / 1073741824).toFixed(2);
-        const baseLimitGB = inboundsCount > 0 ? ((trafficData.obj.total / inboundsCount) / 1073741824).toFixed(2) : 0;
-        const remainingUsageGB = inboundsCount > 0 ? Math.max(0, baseLimitGB - totalUsageGB).toFixed(2) : 0;
+        const finalUp = trafficData.obj.up || 0;
+        const finalDown = trafficData.obj.down || 0;
+        const finalTotal = trafficData.obj.total || 0;
+
+        const totalUsageGB = ((finalUp + finalDown) / 1073741824).toFixed(2);
+        const baseLimitGB = (finalTotal / 1073741824).toFixed(2);
+        const remainingUsageGB = Math.max(0, baseLimitGB - totalUsageGB).toFixed(2);
 
         let dbUsername = targetSubId;
         if (foundClient && foundClient.email) {
@@ -277,7 +276,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             lastConnectionStr = `${hours}:${minutes}:${seconds}  ${jy}/${jm < 10 ? '0' + jm : jm}/${jd < 10 ? '0' + jd : jd}`;
         } else {
             // Fallback heuristic if it's 0 or missing
-            if ((trafficData.obj.up + trafficData.obj.down) > 0) {
+            if ((finalUp + finalDown) > 0) {
                 lastConnectionStr = "در حال استفاده (جزئیات نامشخص)";
             } else {
                 lastConnectionStr = "تاکنون متصل نشده است";
@@ -336,6 +335,9 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             return res.render("sub", {
                 data: {
                     ...trafficData.obj,
+                    up: finalUp,
+                    down: finalDown,
+                    total: finalTotal,
                     email: dbUsername, // Override the email string to not show _inb1 in the UI
                     expiryTimeJalali,
                     suburl,
@@ -368,19 +370,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         let finalContent = combinedContent;
         if (!isBrowserRequest(userAgent)) {
             try {
-                // 1. Count how many inbounds this user belongs to
-                let inboundsCount = 0;
-                listResult.obj.forEach(inbound => {
-                    const settings = JSON.parse(inbound.settings);
-                    const hasClient = settings.clients.some(c => c.email === foundClient.email);
-                    if (hasClient) inboundsCount++;
-                });
-
                 if (inboundsCount > 0) {
-                    // 2. Calculate actual base limit per inbound
-                    const totalUsageGB = ((trafficData.obj.up + trafficData.obj.down) / 1073741824).toFixed(2);
-                    const baseLimitGB = ((trafficData.obj.total / inboundsCount) / 1073741824).toFixed(2);
-
                     // 3. Calculate remaining days
                     let daysText = "Unlimited";
                     if (trafficData.obj.expiryTime > 0) {
