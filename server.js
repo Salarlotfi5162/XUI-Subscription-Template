@@ -208,14 +208,16 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
 
         listResult.obj.forEach(inbound => {
             const settings = JSON.parse(inbound.settings);
-            const client = settings.clients.find(c => c.email === foundClient.email);
+            const client = settings.clients.find(c => c.subId === targetSubId);
             if (client) {
                 inboundsCount++;
             }
 
             // In Sanaei, clientStats array holds the traffic/online status for each client
             if (inbound.clientStats) {
-                const cStats = inbound.clientStats.find(c => c.email === foundClient.email);
+                // Find the specific email for this inbound since Sanaei might append _inbX to the email
+                const clientEmailInThisInbound = client ? client.email : null;
+                const cStats = inbound.clientStats.find(c => c.email === clientEmailInThisInbound);
                 if (cStats) {
                     if (cStats.lastOnline && cStats.lastOnline > lastConnectionTime) {
                         lastConnectionTime = cStats.lastOnline;
