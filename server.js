@@ -202,9 +202,9 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         // 1. Calculate advanced UI data from trafficData & listResult
         let inboundsCount = 0;
         let lastConnectionTime = 0; // Will hold the max lastOnline among all inbounds
-        let sumUp = 0;
-        let sumDown = 0;
-        let maxTotal = 0;
+
+        let traffic = { up: 0, down: 0, total: 0, expiryTime: 0 };
+        let firstTrafficSet = false;
 
         listResult.obj.forEach(inbound => {
             const settings = JSON.parse(inbound.settings);
@@ -220,10 +220,27 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
                     if (cStats.lastOnline && cStats.lastOnline > lastConnectionTime) {
                         lastConnectionTime = cStats.lastOnline;
                     }
-                    if (cStats.up) sumUp += cStats.up;
-                    if (cStats.down) sumDown += cStats.down;
-                    if (cStats.total && cStats.total > maxTotal) {
-                        maxTotal = cStats.total;
+
+                    // Native Sanaei Logic Conversion:
+                    if (!firstTrafficSet) {
+                        traffic.up = cStats.up || 0;
+                        traffic.down = cStats.down || 0;
+                        traffic.total = cStats.total || 0;
+                        if (cStats.expiryTime > 0) {
+                            traffic.expiryTime = cStats.expiryTime;
+                        }
+                        firstTrafficSet = true;
+                    } else {
+                        traffic.up += cStats.up || 0;
+                        traffic.down += cStats.down || 0;
+                        if (traffic.total === 0 || cStats.total === 0) {
+                            traffic.total = 0;
+                        } else {
+                            traffic.total += cStats.total || 0;
+                        }
+                        if (cStats.expiryTime !== traffic.expiryTime) {
+                            traffic.expiryTime = 0;
+                        }
                     }
                 }
             } else if (client && client.lastOnline) {
@@ -234,9 +251,14 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             }
         });
 
-        const finalUp = sumUp > 0 || sumDown > 0 ? sumUp : (trafficData.obj.up || 0);
-        const finalDown = sumUp > 0 || sumDown > 0 ? sumDown : (trafficData.obj.down || 0);
-        const finalTotal = maxTotal > 0 ? maxTotal : (trafficData.obj.total || 0);
+        const finalUp = traffic.up;
+        const finalDown = traffic.down;
+        const finalTotal = traffic.total;
+
+        // Use exact expiry time from manually grouped info. Overwrite the API single value
+        if (firstTrafficSet) {
+            trafficData.obj.expiryTime = traffic.expiryTime;
+        }
 
         const totalUsageGB = ((finalUp + finalDown) / 1073741824).toFixed(2);
         const baseLimitGB = (finalTotal / 1073741824).toFixed(2);
