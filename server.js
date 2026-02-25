@@ -200,11 +200,15 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
 
         // --- Added Logic for Premium UI ---
         // 1. Calculate advanced UI data from trafficData & listResult
+        let inboundsCount = 0;
         let lastConnectionTime = 0; // Will hold the max lastOnline among all inbounds
 
         listResult.obj.forEach(inbound => {
             const settings = JSON.parse(inbound.settings);
             const client = settings.clients.find(c => c.email === foundClient.email);
+            if (client) {
+                inboundsCount++;
+            }
 
             // In Sanaei, clientStats array holds the traffic/online status for each client
             if (inbound.clientStats) {
