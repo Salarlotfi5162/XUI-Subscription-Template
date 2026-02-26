@@ -456,7 +456,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
         fs.appendFile(path.join(__dirname, 'db_errors.log'), logMsg, () => { });
 
         const userAgent = req.headers['user-agent'] || '';
-        const errorMsg = "⚠️ حساب کاربری شما غیرفعال شده یا مشکلی رخ داده است. لطفاً با پشتیبانی تماس بگیرید.";
+        const errorMsg = "حجم اشتراک شما به پایان رسیده است. 🥀؟";
 
         if (isBrowserRequest(userAgent)) {
             const supportLink = TELEGRAM_URL ? `<a href="${TELEGRAM_URL}" class="btn">ارتباط با پشتیبانی تلگرام</a>` : '';
