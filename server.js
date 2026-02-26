@@ -9,6 +9,8 @@ import https from 'https';
 import http from 'http';
 import speakeasy from 'speakeasy';
 import mysql from 'mysql2/promise';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 // Database pool will be initialized after loading config
 
@@ -18,12 +20,21 @@ const app = express();
 
 // Security Settings
 app.disable('x-powered-by'); // Hide Express JS signature
-app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    next();
+app.use(helmet({
+    contentSecurityPolicy: false, // Disabling CSP for now to not break dynamic template rendering/inline scripts
+    crossOriginEmbedderPolicy: false
+}));
+
+// Rate Limiting (Prevent DDoS and Brute Force)
+const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    limit: 60, // Limit each IP to 60 requests per windowMs
+    standardHeaders: 'draft-7', // draft-6: RateLimit-* headers; draft-7: combined RateLimit header
+    legacyHeaders: false, // Disable the X-RateLimit-* headers
+    message: { error: "تعداد درخواست‌های شما بیش از حد مجاز است. لطفاً کمی صبر کنید." }
 });
+
+app.use(limiter);
 
 const CONFIG_FILE_NAME = "dvhost.config";
 const BROWSER_KEYWORDS = ['Mozilla', 'Chrome', 'Safari', 'Edge', 'Opera', 'Firefox', 'Trident', 'WebKit'];
@@ -180,6 +191,12 @@ const xuiApiCall = async (endpoint, method = "GET") => {
 app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
     try {
         const { subId: targetSubId } = req.params;
+
+        // Input Validation: Ensure subId contains only alphanumeric, dash, and underscore
+        if (!/^[a-zA-Z0-9_-]+$/.test(targetSubId)) {
+            return res.status(400).json({ error: "شناسه نامعتبر است." });
+        }
+
         const userAgent = req.headers['user-agent'] || '';
 
         const [listResult, suburl_content] = await Promise.all([
@@ -435,9 +452,45 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
 
         res.send(Buffer.from(finalContent, 'utf-8').toString('base64'));
     } catch (error) {
-        const logMsg = `[${new Date().toISOString()}] Server Error (SubID: ${req.params.subId}): ${error.message}\n${error.stack}\n`;
+        const logMsg = `[${new Date().toISOString()}] Server Error (SubID: ${req.params.subId}): ${error.message}\n`;
         fs.appendFile(path.join(__dirname, 'db_errors.log'), logMsg, () => { });
-        res.status(500).json({ error: "خطای داخلی سرور رخ داده است. لطفاً به پشتیبانی اطلاع دهید." });
+
+        const userAgent = req.headers['user-agent'] || '';
+        const errorMsg = "⚠️ حساب کاربری شما غیرفعال شده یا مشکلی رخ داده است. لطفاً با پشتیبانی تماس بگیرید.";
+
+        if (isBrowserRequest(userAgent)) {
+            const supportLink = TELEGRAM_URL ? `<a href="${TELEGRAM_URL}" class="btn">ارتباط با پشتیبانی تلگرام</a>` : '';
+            res.status(500).send(`
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>پشتیبانی</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.0.0/Vazirmatn-font-face.css');
+        body { background-color: #110e12; color: #f2f2f2; font-family: 'Vazirmatn', Tahoma, Arial; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; }
+        .container { background: #1a171d; padding: 40px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.08); max-width: 90%; width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #d82b57; margin-bottom: 20px; font-size: 24px; }
+        p { color: #9aa0a6; line-height: 1.8; font-size: 16px; margin-bottom: 25px; }
+        .btn { background: #d82b57; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; transition: all 0.3s; display: inline-block; }
+        .btn:hover { background: #b82247; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(216, 43, 87, 0.4); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>⚠️ دسترسی مسدود است</h2>
+        <p>${errorMsg}</p>
+        ${supportLink}
+    </div>
+</body>
+</html>
+            `);
+        } else {
+            const dummyName = encodeURIComponent(errorMsg);
+            const dummyConfig = "vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?type=tcp&security=none#" + dummyName + "\\n";
+            res.status(500).send(Buffer.from(dummyConfig, 'utf-8').toString('base64'));
+        }
     }
 });
 
@@ -448,18 +501,18 @@ const fetchUrlContent = async function fetchUrlContent(url) {
             : new http.Agent();
         const response = await fetch(url, { agent });
         if (!response.ok) {
-            throw new Error(`Failed to fetch URL: ${url}, Status: ${response.status}`);
+            throw new Error(`Failed to fetch URL: ${url}, Status: ${response.status} `);
         }
         return await response.text();
     } catch (error) {
-        console.error(`Error fetching URL: ${url}`, error.message);
+        console.error(`Error fetching URL: ${url} `, error.message);
         throw error;
     }
 };
 
 const startServers = () => {
     http.createServer(app).listen(SUB_HTTP_PORT, () => {
-        console.log(`HTTP Server is running on port ${SUB_HTTP_PORT}`);
+        console.log(`HTTP Server is running on port ${SUB_HTTP_PORT} `);
     });
 
     if (PUBLIC_KEY_PATH && PRIVATE_KEY_PATH &&
@@ -469,7 +522,7 @@ const startServers = () => {
             cert: fs.readFileSync(PUBLIC_KEY_PATH)
         };
         https.createServer(options, app).listen(SUB_HTTPS_PORT, () => {
-            console.log(`HTTPS Server is running on port ${SUB_HTTPS_PORT}`);
+            console.log(`HTTPS Server is running on port ${SUB_HTTPS_PORT} `);
         });
     } else {
         console.warn('SSL certificates not found. Only HTTP server is running.');
