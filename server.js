@@ -501,18 +501,18 @@ const fetchUrlContent = async function fetchUrlContent(url) {
             : new http.Agent();
         const response = await fetch(url, { agent });
         if (!response.ok) {
-            throw new Error(`Failed to fetch URL: ${url}, Status: ${response.status} `);
+            throw new Error(`Failed to fetch URL: ${url}, Status: ${response.status}`);
         }
         return await response.text();
     } catch (error) {
-        console.error(`Error fetching URL: ${url} `, error.message);
+        console.error(`Error fetching URL: ${url}`, error.message);
         throw error;
     }
 };
 
 const startServers = () => {
     http.createServer(app).listen(SUB_HTTP_PORT, () => {
-        console.log(`HTTP Server is running on port ${SUB_HTTP_PORT} `);
+        console.log(`HTTP Server is running on port ${SUB_HTTP_PORT}`);
     });
 
     if (PUBLIC_KEY_PATH && PRIVATE_KEY_PATH &&
@@ -522,7 +522,7 @@ const startServers = () => {
             cert: fs.readFileSync(PUBLIC_KEY_PATH)
         };
         https.createServer(options, app).listen(SUB_HTTPS_PORT, () => {
-            console.log(`HTTPS Server is running on port ${SUB_HTTPS_PORT} `);
+            console.log(`HTTPS Server is running on port ${SUB_HTTPS_PORT}`);
         });
     } else {
         console.warn('SSL certificates not found. Only HTTP server is running.');
