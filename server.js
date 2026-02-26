@@ -440,7 +440,7 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
 
                     // 4. Create dummy config
                     const dummyName = encodeURIComponent(`📥 ${totalUsageGB}GB / ${baseLimitGB}GB | ⏳ ${daysText}`);
-                    const dummyConfig = `vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?type=tcp&security=none#${dummyName}\n`;
+                    const dummyConfig = `vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?path=%2F&security=none&encryption=none&type=tcp#${dummyName}\n`;
 
                     finalContent = dummyConfig + finalContent;
                 }
@@ -488,8 +488,9 @@ app.get(`/${SUBSCRIPTION.split('/')[3]}/:subId`, async (req, res) => {
             `);
         } else {
             const dummyName = encodeURIComponent(errorMsg);
-            const dummyConfig = "vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?type=tcp&security=none#" + dummyName + "\\n";
-            res.status(500).send(Buffer.from(dummyConfig, 'utf-8').toString('base64'));
+            // using a standard valid structure: vless://uuid@host:port?type=tcp&security=none#name
+            const dummyConfig = "vless://00000000-0000-0000-0000-000000000000@127.0.0.1:80?path=%2F&security=none&encryption=none&type=tcp#" + dummyName + "\n";
+            res.status(200).send(Buffer.from(dummyConfig, 'utf-8').toString('base64'));
         }
     }
 });
